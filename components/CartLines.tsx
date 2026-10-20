@@ -14,13 +14,13 @@ export default function CartLines({ lines }: { lines: L[] }) {
     <div className="space-y-2">
       {lines.map((l) => (
         <div key={l.id} className="card flex gap-3.5 p-3.5">
-          <Link href={l.href} className="w-16 shrink-0">{l.kind === "figure" ? <div className="overflow-hidden rounded-[10px] border-2 border-ink dark:border-line"><FigureArt color={l.color} name={l.title} rounded={false} /></div> : <Cover title={l.title} color={l.color} image={l.image} size="sm" />}</Link>
+          <Link href={l.href} className="w-16 shrink-0">{l.kind === "figure" ? <div className="overflow-hidden rounded-[10px] border border-line dark:border-line"><FigureArt color={l.color} name={l.title} rounded={false} /></div> : <Cover title={l.title} color={l.color} image={l.image} size="sm" />}</Link>
           <div className="min-w-0 flex-1">
             <div className="line-clamp-2 font-bold leading-tight">{l.title}</div>
             <div className="mt-0.5 truncate text-[13px] text-muted">{l.subtitle.replace(" · ", ", ")}</div>
             <div className="mt-2 flex items-center gap-2">
               <span className="price text-[17px]">₹{(l.price * l.qty).toLocaleString("en-IN")}</span>
-              <div className="ml-auto flex items-center rounded-xl border-2 border-ink dark:border-line">
+              <div className="ml-auto flex items-center rounded-xl border border-line dark:border-line">
                 <button className="h-9 w-9 text-lg font-bold" onClick={() => set(l.id, l.qty - 1)} aria-label="One fewer">−</button>
                 <span className="w-6 text-center font-bold">{l.qty}</span>
                 <button className="h-9 w-9 text-lg font-bold" onClick={() => set(l.id, l.qty + 1)} aria-label="One more" disabled={l.kind === "box" && l.qty >= 3}>+</button>

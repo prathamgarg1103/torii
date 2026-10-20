@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
-import { gsap, reduced } from "@/lib/motion";
+import { EASE, gsap, reduced } from "@/lib/motion";
 import { IconLock, IconCheck } from "./Icons";
 
 type Row = [number, number, number, number]; // number, volume, free, canRead
@@ -20,13 +20,13 @@ export default function ChapterList({ slug, lang, rows, readUpTo, totalVolumes }
   const toggle = (v: number) => {
     const opening = !open.has(v);
     setOpen((o) => { const n = new Set(o); opening ? n.add(v) : n.delete(v); return n; });
-    if (opening && !reduced()) requestAnimationFrame(() => { const el = lists.current[v]; el && gsap.from(el, { height: 0, opacity: 0, duration: 0.3, ease: "power2.out", clearProps: "height,opacity" }); });
+    if (opening && !reduced()) requestAnimationFrame(() => { const el = lists.current[v]; el && gsap.from(el, { height: 0, opacity: 0, duration: 0.6, ease: EASE, clearProps: "height,opacity" }); });
   };
 
   return (
     <section aria-labelledby="chapters">
       <div className="mb-3 flex items-center gap-2">
-        <h2 id="chapters" className="h-section mr-auto">Chapters</h2>
+        <h2 id="chapters" data-reveal="lines" className="h-section mr-auto">Chapters</h2>
         <form onSubmit={(e) => { e.preventDefault(); const n = parseInt(jump, 10); if (n >= 1 && n <= rows.length) location.href = `/read/${slug}/${n}?lang=${lang}`; }}>
           <input className="input min-h-[38px] w-[104px] py-1 text-[14px]" inputMode="numeric" placeholder="Go to…" value={jump} onChange={(e) => setJump(e.target.value.replace(/\D/g, ""))} aria-label="Go to chapter number" />
         </form>
@@ -38,9 +38,9 @@ export default function ChapterList({ slug, lang, rows, readUpTo, totalVolumes }
           const first = Math.min(...list.map((r) => r[0])), last = Math.max(...list.map((r) => r[0]));
           const done = vol !== 0 && vol <= totalVolumes && last <= readUpTo;
           return (
-            <div key={vol} className={`overflow-hidden rounded-panel border-2 bg-card ${isOpen ? "border-ink dark:border-fg/60" : "border-line"}`}>
+            <div key={vol} className={`overflow-hidden rounded-panel border bg-card transition-colors duration-300 ${isOpen ? "border-fg/25" : "border-line"}`}>
               <button className="flex min-h-[52px] w-full items-center gap-3 px-4 text-left" onClick={() => toggle(vol)} aria-expanded={isOpen}>
-                <span className="font-display text-[15px]">{vol === 0 ? "Latest chapters" : `Volume ${vol}`}</span>
+                <span className="text-[15px] font-bold tracking-[-0.02em]">{vol === 0 ? "Latest chapters" : `Volume ${vol}`}</span>
                 <span className="text-[12.5px] text-muted">{first === last ? `Chapter ${first}` : `Chapters ${first} to ${last}`}</span>
                 {done && <span className="flex h-5 w-5 items-center justify-center rounded-full bg-ok text-white" aria-label="Read"><IconCheck className="h-3 w-3" /></span>}
                 <span aria-hidden className={`ml-auto text-xl leading-none transition-transform ${isOpen ? "rotate-45" : ""}`}>+</span>

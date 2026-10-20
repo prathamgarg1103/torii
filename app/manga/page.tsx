@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RevealScope from "@/components/RevealScope";
 import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { ownedVolumes, publisherName } from "@/lib/catalog";
@@ -20,8 +21,8 @@ export default async function MangaHome({ searchParams }: { searchParams: { pub?
 
   return (
     <div className="space-y-8">
-      <section className="paper-band relative -mx-4 -mt-5 overflow-hidden border-b-2 border-ink px-4 pb-6 pt-7 dark:border-line">
-        <div className="tone pointer-events-none absolute inset-0 opacity-50" />
+      <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 pt-7 dark:border-line">
+        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative">
           <h1 className="font-display text-[clamp(30px,9vw,48px)] leading-[0.98]">Every volume,<br />in order.</h1>
           <p className="mt-3 max-w-[34ch] text-[15px] leading-snug">Printed in India from ₹299. Every copy carries a code you can scan to prove it's real.</p>
@@ -40,19 +41,19 @@ export default async function MangaHome({ searchParams }: { searchParams: { pub?
 
       {!filtered && (
         <section aria-labelledby="box">
-          <h2 id="box" className="h-section mb-3">Whole series in one box</h2>
-          <div className="no-scrollbar -mx-4 flex gap-4 overflow-x-auto px-4 pb-3">
+          <h2 id="box" data-reveal="lines" className="h-section mb-3">Whole series in one box</h2>
+          <div data-reveal="stagger" className="no-scrollbar -mx-4 flex gap-4 overflow-x-auto px-4 pb-3">
             {boxes.map((b) => {
               const s = db.series.find((x) => x.id === b.seriesId)!;
               return (
                 <Link key={b.id} href={`/manga/${s.slug}`} className="group w-[220px] shrink-0">
-                  <div className="relative h-[170px] rounded-panel border-2 border-ink bg-card p-3 shadow-panel transition-transform group-hover:-translate-y-1 dark:border-line dark:shadow-none">
+                  <div className="relative h-[170px] rounded-panel border border-line bg-card p-3 shadow-panel transition-transform group-hover:-translate-y-1 dark:border-line dark:shadow-none">
                     <div className="flex h-full items-end gap-[2px] overflow-hidden">
                       {Array.from({ length: Math.min(b.toVol, 16) }, (_, k) => (
                         <div key={k} className="h-full flex-1 rounded-[2px] border border-ink/60" style={{ background: s.color, filter: `hue-rotate(${((k * 23) % 50) - 25}deg) brightness(${0.85 + (k % 3) * 0.08})` }} />
                       ))}
                     </div>
-                    <span className="absolute right-2 top-2 rounded-md border-2 border-ink bg-card px-1.5 text-[12px] font-black dark:border-line">{b.toVol} books</span>
+                    <span className="absolute right-2 top-2 rounded-md border border-line bg-card px-1.5 text-[12px] font-black dark:border-line">{b.toVol} books</span>
                   </div>
                   <div className="mt-2 font-bold leading-tight">{s.title}</div>
                   <div className="text-[13.5px]"><span className="price text-[16px]">{inr(b.price)}</span> <span className="text-muted">for the set</span></div>
@@ -64,16 +65,17 @@ export default async function MangaHome({ searchParams }: { searchParams: { pub?
       )}
 
       <section aria-labelledby="series" className="space-y-3">
-        <h2 id="series" className="h-section">{filtered ? `${list.length} series found` : "Shop by series"}</h2>
+        <h2 id="series" data-reveal="lines" className="h-section">{filtered ? `${list.length} series found` : "Shop by series"}</h2>
+        <div data-reveal="stagger" className="space-y-3">
         {list.map((s) => {
           const vols = db.volumes.filter((v) => v.seriesId === s.id);
           const minP = Math.min(...vols.map((v) => v.price));
           const owned = user ? ownedVolumes(db, user.id, s.id).size : 0;
           return (
-            <Link key={s.id} href={`/manga/${s.slug}`} className="card flex items-center gap-4 p-3 transition-colors hover:border-ink dark:hover:border-fg/50">
+            <Link key={s.id} href={`/manga/${s.slug}`} className="group card flex items-center gap-4 p-3 hover:border-fg/25 hover:shadow-panel-sm">
               <div className="w-[64px] shrink-0"><Cover title={s.title} color={s.color} image={s.image} size="sm" /></div>
               <div className="min-w-0 flex-1">
-                <div className="font-display text-[16px] leading-tight">{s.title}</div>
+                <div className="text-[16px] font-bold tracking-[-0.02em] leading-tight">{s.title}</div>
                 <div className="mt-0.5 text-[13px] text-muted">{s.author}, {publisherName(db, s.publisherId)}</div>
                 <div className="mt-1.5 text-[13.5px]"><span className="font-bold">{s.totalVolumes} volumes</span> from <span className="price">{inr(minP)}</span></div>
                 {owned > 0 && (
@@ -86,8 +88,10 @@ export default async function MangaHome({ searchParams }: { searchParams: { pub?
             </Link>
           );
         })}
+        </div>
         {!list.length && <div className="panel p-6 text-center"><p className="font-bold">No series match “{searchParams.q}”.</p><Link href="/manga" className="btn-ghost mt-3">Show all series</Link></div>}
       </section>
+      <RevealScope />
     </div>
   );
 }

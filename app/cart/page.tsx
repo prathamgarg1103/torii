@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RevealScope from "@/components/RevealScope";
 import { read } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { cartFor } from "@/lib/catalog";
@@ -28,6 +29,7 @@ export default async function Cart() {
         <div className="flex justify-between border-t border-line pt-2.5 font-bold"><span>Total</span><span className="price text-[22px]">{inr(total)}</span></div>
       </div>
       <Link href="/checkout" className="btn-primary w-full text-[16px]">Checkout, {inr(total)}</Link>
+      <RevealScope />
     </div>
   );
 }

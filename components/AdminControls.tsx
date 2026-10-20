@@ -28,7 +28,7 @@ export default function AdminControls({ mode, slugs, overrides }: { mode: "free"
     <div className="grid gap-3 md:grid-cols-2">
       <div className="card p-4">
         <div className="label">Reading mode</div>
-        <div className="mt-2 flex rounded-xl border-2 border-ink p-1 dark:border-line">
+        <div className="mt-2 flex rounded-xl border border-line p-1 dark:border-line">
           {(["free", "paid"] as const).map((m) => (
             <button key={m} disabled={busy} onClick={() => setMode(m)} className={`flex-1 rounded-lg py-2.5 text-[14px] font-bold ${mode === m ? "bg-ink text-white dark:bg-fg dark:text-bg" : "text-muted"}`}>
               {m === "free" ? "Free launch" : "Paid, ₹9 a chapter"}

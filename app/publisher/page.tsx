@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RevealScope from "@/components/RevealScope";
 import { read } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { publisherName } from "@/lib/catalog";
@@ -85,6 +86,7 @@ export default async function Publisher({ searchParams }: { searchParams: { pub?
         <Link href="/publisher/tags" className="btn-ghost">Demo authenticity codes</Link>
         <Link href="/read" className="btn-ghost">Open the fan app</Link>
       </div>
+      <RevealScope />
     </div>
   );
 }

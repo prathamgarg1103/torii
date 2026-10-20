@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { gsap, reduced } from "@/lib/motion";
+import { EASE, gsap, reduced } from "@/lib/motion";
 import { IconCheck } from "./Icons";
 
 type Purpose = "unlock" | "topup" | "order";
@@ -80,8 +80,8 @@ function MockUpiSheet({ amount, description, onCancel, onPaid }: { amount: numbe
   const [stage, setStage] = useState<"choose" | "waiting" | "done" | "error">("choose");
   const [msg, setMsg] = useState("");
   const panel = useRef<HTMLDivElement>(null), tick = useRef<HTMLSpanElement>(null);
-  useEffect(() => { if (!reduced() && panel.current) gsap.fromTo(panel.current, { yPercent: 100 }, { yPercent: 0, duration: 0.4, ease: "power3.out" }); }, []);
-  useEffect(() => { if (stage === "done" && tick.current && !reduced()) gsap.fromTo(tick.current, { scale: 0, rotate: -90 }, { scale: 1, rotate: 0, duration: 0.5, ease: "back.out(2.5)" }); }, [stage]);
+  useEffect(() => { if (!reduced() && panel.current) gsap.fromTo(panel.current, { yPercent: 100 }, { yPercent: 0, duration: 0.7, ease: EASE }); }, []);
+  useEffect(() => { if (stage === "done" && tick.current && !reduced()) gsap.fromTo(tick.current, { scale: 0.6, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.7, ease: EASE }); }, [stage]);
   async function pay() {
     if (app === "vpa" && !/^[\w.-]{2,}@[a-z]{2,}$/i.test(vpa)) { setMsg("Enter a valid UPI ID, e.g. name@okaxis"); return; }
     setStage("waiting");
@@ -89,8 +89,8 @@ function MockUpiSheet({ amount, description, onCancel, onPaid }: { amount: numbe
     try { await onPaid(); setStage("done"); } catch (e) { setMsg((e as Error).message); setStage("error"); }
   }
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center" role="dialog" aria-modal="true" aria-label="UPI payment">
-      <div ref={panel} className="w-full max-w-md rounded-t-[24px] border-2 border-b-0 border-ink bg-card p-5 sm:rounded-[24px] sm:border-b-2 dark:border-line" style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}>
+    <div className="fixed inset-0 z-50 flex animate-fade-in items-end justify-center bg-black/40 backdrop-blur-[2px] sm:items-center" role="dialog" aria-modal="true" aria-label="UPI payment">
+      <div ref={panel} className="w-full max-w-md rounded-t-[24px] border border-b-0 border-line bg-card p-5 sm:rounded-[24px] sm:border-b-2 dark:border-line" style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}>
         <div className="mb-1 flex items-center justify-between">
           <span className="rounded-md bg-warn/15 px-2 py-0.5 text-[12.5px] font-bold text-warn">Test payment, no real money moves</span>
           {stage === "choose" && <button className="text-sm text-muted" onClick={onCancel}>Cancel</button>}
@@ -101,12 +101,12 @@ function MockUpiSheet({ amount, description, onCancel, onPaid }: { amount: numbe
           <>
             <div className="grid grid-cols-4 gap-2">
               {APPS.map((a) => (
-                <button key={a.id} onClick={() => setApp(a.id)} className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-2 text-[11.5px] font-bold ${app === a.id ? "border-ink bg-accentsoft dark:border-fg" : "border-line"}`}>
+                <button key={a.id} onClick={() => setApp(a.id)} className={`flex flex-col items-center gap-1.5 rounded-xl border p-2 text-[11.5px] font-semibold transition-colors ${app === a.id ? "border-fg/40 bg-accentsoft" : "border-line"}`}>
                   <span className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: a.c }}>{a.name[0]}</span>{a.name}
                 </button>
               ))}
             </div>
-            <button onClick={() => setApp("vpa")} className={`mt-2 min-h-[46px] w-full rounded-xl border-2 px-3 text-left text-[14px] font-bold ${app === "vpa" ? "border-ink bg-accentsoft dark:border-fg" : "border-line"}`}>Pay with UPI ID</button>
+            <button onClick={() => setApp("vpa")} className={`mt-2 min-h-[46px] w-full rounded-xl border px-3 text-left text-[14px] font-semibold transition-colors ${app === "vpa" ? "border-fg/40 bg-accentsoft" : "border-line"}`}>Pay with UPI ID</button>
             {app === "vpa" && <input className="input mt-2" placeholder="yourname@okaxis" value={vpa} onChange={(e) => setVpa(e.target.value)} autoFocus />}
             {msg && <p className="mt-2 text-xs text-bad">{msg}</p>}
             <button className="btn-primary mt-4 w-full text-[16px]" onClick={pay}>Pay ₹{amount.toLocaleString("en-IN")}</button>
@@ -120,7 +120,7 @@ function MockUpiSheet({ amount, description, onCancel, onPaid }: { amount: numbe
         )}
         {stage === "done" && (
           <div className="flex flex-col items-center gap-2 py-6 font-semibold text-ok">
-            <span ref={tick} className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-ink bg-ok text-white"><IconCheck className="h-8 w-8" /></span>Payment successful
+            <span ref={tick} className="flex h-14 w-14 items-center justify-center rounded-full border border-line bg-ok text-white"><IconCheck className="h-8 w-8" /></span>Payment successful
           </div>
         )}
         {stage === "error" && (

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RevealScope from "@/components/RevealScope";
 import { read } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { TOPUPS } from "@/lib/payments";
@@ -22,9 +23,9 @@ export default async function Account({ searchParams }: { searchParams: { denied
   if (user.isAdmin) rows.push(["/publisher", "Publisher dashboard", "Sales and reading data"]);
   return (
     <div className="space-y-6">
-      {searchParams.denied && <p className="rounded-xl border-2 border-bad/40 bg-bad/10 px-3 py-2.5 text-[14px] font-semibold text-bad">The publisher dashboard needs a publisher account.</p>}
-      <section className="paper-band relative -mx-4 -mt-5 overflow-hidden border-b-2 border-ink px-4 pb-6 pt-7 dark:border-line">
-        <div className="tone pointer-events-none absolute inset-0 opacity-50" />
+      {searchParams.denied && <p className="rounded-xl border border-bad/30 bg-bad/10 px-3 py-2.5 text-[14px] font-semibold text-bad">The publisher dashboard needs a publisher account.</p>}
+      <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 pt-7 dark:border-line">
+        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative">
           <h1 className="font-display text-[clamp(28px,8vw,40px)] leading-none">{user.name || "Hello, reader"}</h1>
           <p className="mt-2 text-[14.5px] font-semibold">+91 {user.phone.replace(/(\d{5})(\d{5})/, "$1 $2")}{user.isAdmin ? ", publisher account" : ""}</p>
@@ -44,6 +45,7 @@ export default async function Account({ searchParams }: { searchParams: { denied
         ))}
       </nav>
       <LogoutButton />
+      <RevealScope />
     </div>
   );
 }

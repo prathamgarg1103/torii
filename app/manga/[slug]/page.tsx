@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RevealScope from "@/components/RevealScope";
 import { notFound } from "next/navigation";
 import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
@@ -32,10 +33,10 @@ export default async function SeriesShop({ params }: { params: { slug: string } 
 
   return (
     <div className="space-y-7">
-      <section className="paper-band relative -mx-4 -mt-5 overflow-hidden border-b-2 border-ink px-4 pb-6 pt-6 dark:border-line">
-        <div className="tone pointer-events-none absolute inset-0 opacity-50" />
+      <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 pt-6 dark:border-line">
+        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative flex items-end gap-4">
-          <div className="relative h-[190px] w-[150px] shrink-0">
+          <div data-parallax="24" className="relative h-[190px] w-[150px] shrink-0">
             {[3, 2, 1].map((n, k) => (
               <div key={n} className="absolute bottom-0 w-[112px]" style={{ left: k * 18, transform: `rotate(${(k - 1) * 4}deg)`, zIndex: k }}>
                 <Cover title={s.title} color={s.color} image={s.image} vol={n} size="sm" />
@@ -51,13 +52,13 @@ export default async function SeriesShop({ params }: { params: { slug: string } 
         {user && (
           <div className="relative mt-5">
             <div className="mb-1.5 flex justify-between text-[13px] font-bold"><span>Your collection</span><span>{owned.size} of {s.totalVolumes}</span></div>
-            <div className="h-3 overflow-hidden rounded-full border-2 border-ink bg-card dark:border-line"><div className="h-full bg-accent transition-all" style={{ width: `${Math.max(pct, owned.size ? 2 : 0)}%` }} /></div>
+            <div className="h-3 overflow-hidden rounded-full border border-line bg-card dark:border-line"><div className="h-full bg-accent transition-all" style={{ width: `${Math.max(pct, owned.size ? 2 : 0)}%` }} /></div>
           </div>
         )}
       </section>
 
       {readVol > 0 && owned.size < readVol && (
-        <p className="rounded-panel border-2 border-accent/40 bg-accentsoft px-4 py-3 text-[14.5px] font-semibold text-accent">
+        <p className="rounded-panel border border-accent/25 bg-accentsoft px-4 py-3 text-[14.5px] font-semibold text-accent">
           You've read to chapter {prog!.chapter}, which is volume {readVol}. {owned.size ? `You own ${owned.size} so far.` : "You don't own any of these books yet."}
         </p>
       )}
@@ -65,7 +66,7 @@ export default async function SeriesShop({ params }: { params: { slug: string } 
       {missing.length > 0 && (
         <div className="panel flex items-center gap-3 p-4">
           <div className="min-w-0 flex-1">
-            <div className="font-display text-[17px] leading-tight">{owned.size ? "Fill the gaps" : "Start the collection"}</div>
+            <div className="text-[17px] font-bold tracking-[-0.02em] leading-tight">{owned.size ? "Fill the gaps" : "Start the collection"}</div>
             <div className="text-[13.5px] text-muted">{missing.length} volume{missing.length > 1 ? "s" : ""} in stock for {inr(missingTotal)}</div>
           </div>
           <AddToCart items={missing.map((v) => ({ kind: "volume", refId: v.id }))} label={`Add ${missing.length}`} signedIn={!!user} className="btn-primary" />
@@ -73,8 +74,8 @@ export default async function SeriesShop({ params }: { params: { slug: string } 
       )}
 
       {boxes.length > 0 && (
-        <section aria-labelledby="boxes" className="space-y-2">
-          <h2 id="boxes" className="h-section">Box sets</h2>
+        <section aria-labelledby="boxes" className="space-y-2" data-reveal="stagger">
+          <h2 id="boxes" data-reveal="lines" className="h-section">Box sets</h2>
           {boxes.map((b) => {
             const full = vols.filter((v) => v.number >= b.fromVol && v.number <= b.toVol).reduce((a, v) => a + v.price, 0);
             return (
@@ -94,6 +95,7 @@ export default async function SeriesShop({ params }: { params: { slug: string } 
         vols={vols.map((v) => ({ id: v.id, number: v.number, price: v.price, edition: v.edition, stock: v.stock, owned: owned.has(v.number), inCart: inCart.has(v.id) }))} />
 
       <Link href={`/read/${s.slug}`} data-section="read" className="btn-ghost w-full">Read {s.title.replace(/:.*/, "")} online first</Link>
+      <RevealScope />
     </div>
   );
 }

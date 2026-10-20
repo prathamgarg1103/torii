@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { settleGrid } from "@/lib/motion";
 import { Cover } from "./Art";
+import Tilt from "./Tilt";
 import { IconSearch } from "./Icons";
 import { LANGS, type Lang } from "@/lib/types";
 
@@ -24,11 +26,14 @@ export default function ReadCatalog({ items }: { items: Item[] }) {
     return r.sort((a, b) => sort === "az" ? a.title.localeCompare(b.title) : sort === "new" ? b.startYear - a.startYear : b.popularity - a.popularity);
   }, [items, q, pub, genre, lang, status, sort]);
   const active = [pub, genre, lang, status].filter(Boolean).length;
+  const grid = useRef<HTMLDivElement>(null);
+  const first = useRef(true);
+  useEffect(() => { if (first.current) { first.current = false; return; } settleGrid(grid.current); }, [list]);
 
   return (
     <section aria-labelledby="all" className="space-y-4">
       <div className="flex items-baseline justify-between">
-        <h2 id="all" className="h-section">Every series</h2>
+        <h2 id="all" data-reveal="lines" className="h-section">Every series</h2>
         <span className="text-[12.5px] text-muted">{list.length} series</span>
       </div>
       <div className="sticky top-[58px] z-20 -mx-4 space-y-2.5 border-b border-line bg-bg/92 px-4 pb-3 pt-2 backdrop-blur">
@@ -53,11 +58,11 @@ export default function ReadCatalog({ items }: { items: Item[] }) {
           </select>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4">
+      <div ref={grid} data-reveal="stagger" className="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4">
         {list.map((i) => (
           <Link key={i.slug} href={`/read/${i.slug}`} className="group">
-            <div className="transition-transform duration-200 group-hover:-translate-y-1"><Cover title={i.title} color={i.color} image={i.image} size="sm" sub={i.publisher} /></div>
-            <div className="mt-2 line-clamp-2 text-[13.5px] font-bold leading-tight">{i.title}</div>
+            <Tilt><Cover title={i.title} color={i.color} image={i.image} size="sm" sub={i.publisher} /></Tilt>
+            <div className="mt-2.5 line-clamp-2 text-[13.5px] font-semibold leading-tight transition-colors duration-300 group-hover:text-accent">{i.title}</div>
             <div className="mt-0.5 text-[12px] text-muted">{i.chapters.toLocaleString("en-IN")} chapters</div>
           </Link>
         ))}

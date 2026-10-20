@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RevealScope from "@/components/RevealScope";
 import { read } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { fmtDate, inr } from "@/lib/format";
@@ -18,6 +19,7 @@ export default async function Orders() {
           <div className="mt-1.5 flex justify-between text-[13px] text-muted"><span>Placed {fmtDate(o.createdAt)}, arrives {o.eta}</span><span className="price text-[15px] text-fg">{inr(o.total)}</span></div>
         </Link>
       ))}
+      <RevealScope />
     </div>
   );
 }

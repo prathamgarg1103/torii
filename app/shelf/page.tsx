@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RevealScope from "@/components/RevealScope";
 import { read } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { ownedVolumes } from "@/lib/catalog";
@@ -36,13 +37,13 @@ export default async function Shelf() {
 
   return (
     <div className="space-y-8">
-      <section className="paper-band relative -mx-4 -mt-5 overflow-hidden border-b-2 border-ink px-4 pb-6 pt-7 dark:border-line">
-        <div className="tone pointer-events-none absolute inset-0 opacity-50" />
+      <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 pt-7 dark:border-line">
+        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative">
           <h1 className="font-display text-[clamp(30px,9vw,46px)] leading-none">{user.name ? `${user.name}'s shelf` : "Your shelf"}</h1>
           <dl className="mt-5 grid grid-cols-4 gap-2">
             {[[progress.length, "reading"], [unlocks.length, "chapters unlocked"], [ownedVolIds.size, "books owned"], [figs.length, "figures"]].map(([n, l]) => (
-              <div key={String(l)} className="rounded-xl border-2 border-ink bg-card px-2 py-2.5 text-center dark:border-line"><dd className="price text-[24px] leading-none">{n}</dd><dt className="mt-1 text-[11.5px] leading-tight text-muted">{l}</dt></div>
+              <div key={String(l)} className="rounded-xl bg-card/80 px-2 py-2.5 text-center ring-1 ring-inset ring-fg/10"><dd data-count className="price text-[24px] leading-none">{n}</dd><dt className="mt-1 text-[11.5px] leading-tight text-muted">{l}</dt></div>
             ))}
           </dl>
         </div>
@@ -50,7 +51,7 @@ export default async function Shelf() {
 
       {empty && (
         <div className="panel p-6 text-center">
-          <p className="font-display text-[18px]">Nothing here yet</p>
+          <p className="text-[18px] font-bold tracking-[-0.02em]">Nothing here yet</p>
           <p className="mt-1 text-[14.5px] text-muted">Start a series and your progress, books and figures collect here.</p>
           <Link href="/read" data-section="read" className="btn-primary mt-4">Find something to read</Link>
         </div>
@@ -58,7 +59,7 @@ export default async function Shelf() {
 
       {gaps.length > 0 && (
         <section aria-labelledby="gaps" className="space-y-2.5">
-          <h2 id="gaps" className="h-section">Gaps in your collection</h2>
+          <h2 id="gaps" data-reveal="lines" className="h-section">Gaps in your collection</h2>
           {gaps.map((g) => (
             <div key={g.s.id} className="card flex items-center gap-3 p-3.5">
               <div className="w-12 shrink-0"><Cover title={g.s.title} color={g.s.color} size="sm" /></div>
@@ -75,8 +76,8 @@ export default async function Shelf() {
 
       {progress.length > 0 && (
         <section aria-labelledby="reading">
-          <h2 id="reading" className="h-section mb-3">Reading</h2>
-          <div className="space-y-2">
+          <h2 id="reading" data-reveal="lines" className="h-section mb-3">Reading</h2>
+          <div data-reveal="stagger" className="space-y-2">
             {progress.map((p) => {
               const s = db.series.find((x) => x.id === p.seriesId)!;
               const un = unlocks.filter((u) => u.chapterId.startsWith(`c_${s.slug}_`)).length;
@@ -98,13 +99,13 @@ export default async function Shelf() {
 
       {seriesWithVols.length > 0 && (
         <section aria-labelledby="books">
-          <h2 id="books" className="h-section mb-3">Books</h2>
-          <div className="space-y-3">
+          <h2 id="books" data-reveal="lines" className="h-section mb-3">Books</h2>
+          <div data-reveal="stagger" className="space-y-3">
             {seriesWithVols.map((s) => {
               const owned = ownedVolumes(db, user.id, s.id);
               const show = Math.min(s.totalVolumes, 40);
               return (
-                <Link key={s.id} href={`/manga/${s.slug}`} data-section="manga" className="block rounded-panel border-2 border-ink bg-card px-3 pt-3 dark:border-line">
+                <Link key={s.id} href={`/manga/${s.slug}`} data-section="manga" className="block rounded-panel border border-line bg-card px-3 pt-3 dark:border-line">
                   <div className="mb-2 flex justify-between text-[14px]"><span className="font-bold">{s.title}</span><span className="text-muted">{owned.size} of {s.totalVolumes}</span></div>
                   <div className="flex items-end gap-[2px]">
                     {Array.from({ length: show }, (_, i) => {
@@ -112,7 +113,7 @@ export default async function Shelf() {
                       return <span key={i} title={`Volume ${i + 1}`} className={`h-14 flex-1 rounded-t-[3px] ${owned.has(i + 1) ? "border border-ink/70" : "border border-dashed border-muted/40"}`} style={owned.has(i + 1) ? { background: c } : undefined} />;
                     })}
                   </div>
-                  <div className="-mx-3 h-2.5 border-t-2 border-ink bg-line dark:border-line" />
+                  <div className="-mx-3 h-2.5 border-t border-line bg-line dark:border-line" />
                 </Link>
               );
             })}
@@ -122,13 +123,13 @@ export default async function Shelf() {
 
       {figs.length > 0 && (
         <section aria-labelledby="figs">
-          <h2 id="figs" className="h-section mb-3">Figures</h2>
-          <div className="grid grid-cols-3 gap-3">
+          <h2 id="figs" data-reveal="lines" className="h-section mb-3">Figures</h2>
+          <div data-reveal="stagger" className="grid grid-cols-3 gap-3">
             {figs.map(({ f, o }) => {
               const tag = db.tags.find((t) => t.ownerId === user.id && t.refId === f.id);
               return (
                 <Link key={f.id} href={`/figures/${f.slug}`} data-section="figures" className="group">
-                  <div className="overflow-hidden rounded-panel border-2 border-ink dark:border-line"><FigureArt color={f.color} name={f.name} image={f.image} rounded={false} /></div>
+                  <div className="overflow-hidden rounded-panel border border-line dark:border-line"><FigureArt color={f.color} name={f.name} image={f.image} rounded={false} /></div>
                   <div className="mt-1.5 line-clamp-2 text-[12.5px] font-bold leading-tight">{f.name}</div>
                   <div className="text-[12px] font-semibold text-ok">{tag ? "Verified" : o.source === "order" ? "On its way" : "Owned"}{tag?.editionNo ? `, #${String(tag.editionNo).padStart(4, "0")}` : ""}</div>
                 </Link>
@@ -137,6 +138,7 @@ export default async function Shelf() {
           </div>
         </section>
       )}
+      <RevealScope />
     </div>
   );
 }

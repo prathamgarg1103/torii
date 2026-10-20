@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, reduced } from "@/lib/motion";
+import { EASE, gsap, reduced } from "@/lib/motion";
 import PayButton from "./PayButton";
 import { Cover } from "./Art";
 import { IconBack, IconLock } from "./Icons";
@@ -16,15 +16,15 @@ export default function UnlockGate({ slug, title, chapter, chapterId, lang, pric
   const [err, setErr] = useState("");
   const root = useRef<HTMLDivElement>(null);
   const here = `/read/${slug}/${chapter}?lang=${lang}`;
-  useGSAP(() => { if (!reduced()) gsap.from("[data-lock]", { y: -16, rotate: -12, duration: 0.6, ease: "elastic.out(1, .5)" }); }, { scope: root });
+  useGSAP(() => { if (!reduced()) gsap.timeline({ defaults: { ease: EASE } }).from("[data-art]", { clipPath: "inset(100% 0% 0% 0%)", duration: 1.1 }).from("[data-lock]", { scale: 0.6, autoAlpha: 0, duration: 0.8 }, 0.35).from("[data-copy] > *", { autoAlpha: 0, y: 14, duration: 0.8, stagger: 0.06, clearProps: "transform" }, 0.45); }, { scope: root });
 
   // Shackle pops open, then the chapter loads.
   const celebrate = () => new Promise<void>((res) => {
     if (reduced() || !root.current) return res();
     gsap.timeline({ onComplete: res })
-      .to("[data-shackle]", { y: -7, rotate: -25, transformOrigin: "80% 100%", duration: 0.25, ease: "back.out(3)" })
-      .to("[data-lock]", { scale: 1.15, duration: 0.15 }, "<")
-      .to("[data-lock]", { scale: 0, opacity: 0, duration: 0.25, ease: "power2.in" }, "+=0.15");
+      .to("[data-shackle]", { y: -5, rotate: -18, transformOrigin: "80% 100%", duration: 0.45, ease: "power3.out" })
+      .to("[data-lock]", { scale: 0.85, autoAlpha: 0, filter: "blur(6px)", duration: 0.45, ease: "power3.in" }, "+=0.1")
+      .to("[data-art]", { filter: "blur(0px)", duration: 0.5, ease: "power2.out" }, "<");
   });
   async function useWallet() {
     setBusy(true); setErr("");
@@ -35,7 +35,7 @@ export default function UnlockGate({ slug, title, chapter, chapterId, lang, pric
   }
   return (
     <div ref={root} data-section="read" className="min-h-screen bg-bg">
-      <div className="paper-band border-b-2 border-ink dark:border-line" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+      <div className="paper-band border-b border-line" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         <div className="mx-auto flex h-[58px] max-w-3xl items-center gap-2 px-2">
           <Link href={`/read/${slug}?lang=${lang}`} className="flex h-11 w-11 items-center justify-center" aria-label="Back to chapters"><IconBack /></Link>
           <div className="truncate font-bold">{title}, chapter {chapter}</div>
@@ -43,12 +43,12 @@ export default function UnlockGate({ slug, title, chapter, chapterId, lang, pric
       </div>
       <div className="mx-auto max-w-sm px-4 pt-10 text-center">
         <div className="relative mx-auto w-36">
-          <div className="opacity-90 blur-[2px]"><Cover title={title} color={color} vol={chapter} size="md" /></div>
-          <div data-lock className="absolute inset-0 m-auto flex h-20 w-20 items-center justify-center rounded-full border-2 border-ink bg-accent text-white shadow-panel">
+          <div data-art className="opacity-90 blur-[2px]"><Cover title={title} color={color} vol={chapter} size="md" /></div>
+          <div data-lock className="absolute inset-0 m-auto flex h-20 w-20 items-center justify-center rounded-full bg-accent text-white shadow-panel ring-4 ring-white/40">
             <svg viewBox="0 0 24 24" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><rect x="4.5" y="11" width="15" height="10" rx="2" fill="currentColor" stroke="none" /><path data-shackle d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
           </div>
         </div>
-        <h1 className="h-title mt-6">Unlock chapter {chapter}</h1>
+        <div data-copy><h1 className="h-title mt-7">Unlock chapter {chapter}</h1>
         <p className="mx-auto mt-2 max-w-[30ch] text-[15px] leading-snug text-muted">₹{price}, once. It stays yours in every language, and the money goes to the people who made it.</p>
         <div className="mt-7 space-y-2.5">
           {!signedIn ? (
@@ -63,7 +63,7 @@ export default function UnlockGate({ slug, title, chapter, chapterId, lang, pric
             </>
           )}
           {err && <p className="text-[13px] font-semibold text-bad">{err}</p>}
-        </div>
+        </div></div>
       </div>
     </div>
   );

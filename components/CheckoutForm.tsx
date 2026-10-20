@@ -19,7 +19,7 @@ export default function CheckoutForm({ total, count, defaults }: { total: number
           <input className="input" inputMode="numeric" maxLength={6} value={pincode} onChange={(e) => setPincode(e.target.value.replace(/\D/g, ""))} placeholder="e.g. 151001" autoComplete="postal-code" />
         </label>
         {pincode.length === 6 && (info.valid
-          ? <div className="rounded-xl border-2 border-accent/30 bg-accentsoft px-3 py-2.5 text-[14px] font-semibold text-accent">Delivers to {info.city ? `the ${info.city} area, ` : ""}{info.state}, by {info.eta}</div>
+          ? <div className="rounded-xl border border-accent/25 bg-accentsoft px-3 py-2.5 text-[14px] font-semibold text-accent">Delivers to {info.city ? `the ${info.city} area, ` : ""}{info.state}, by {info.eta}</div>
           : <div className="text-[14px] font-semibold text-bad">That pincode doesn't look right. Check the six digits.</div>)}
       </div>
       <div className="card flex items-center justify-between p-4 font-bold"><span>{count} item{count > 1 ? "s" : ""}, free delivery</span><span className="price text-[22px]">₹{total.toLocaleString("en-IN")}</span></div>

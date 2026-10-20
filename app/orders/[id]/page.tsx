@@ -23,8 +23,8 @@ export default async function OrderPage({ params, searchParams }: { params: { id
     <div className="space-y-4">
       {searchParams.new && (
         <div className="panel paper-band flex items-center gap-3 p-4">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-ok text-white"><IconCheck className="h-6 w-6" /></span>
-          <div><div className="font-display text-[19px] leading-tight">Order placed</div><div className="text-[14px]">Paid with UPI. Arrives {o.eta}.</div></div>
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-ok text-white"><IconCheck className="h-6 w-6" /></span>
+          <div><div className="text-[19px] font-bold tracking-[-0.02em] leading-tight">Order placed</div><div className="text-[14px]">Paid with UPI. Arrives {o.eta}.</div></div>
         </div>
       )}
       <div className="card space-y-2 p-4 text-[14.5px]">
@@ -42,7 +42,7 @@ export default async function OrderPage({ params, searchParams }: { params: { id
         <div className="flex items-center justify-between border-t border-line pt-2 font-bold"><span>Total</span><span className="price text-[20px]">{inr(o.total)}</span></div>
       </div>
       <section>
-        <h2 className="h-section">Authenticity codes in your parcel</h2>
+        <h2 data-reveal="lines" className="h-section">Authenticity codes in your parcel</h2>
         <p className="mb-3 mt-1 text-[13.5px] text-muted">Each item ships with one of these on its tag or inside cover. For this demo, scan one with another phone, or tap it.</p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {codes.slice(0, 24).map((c, i) => (

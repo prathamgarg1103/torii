@@ -1,10 +1,12 @@
 import Link from "next/link";
+import RevealScope from "@/components/RevealScope";
 import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { publisherName } from "@/lib/catalog";
 import { Cover } from "@/components/Art";
 import ReadCatalog from "@/components/ReadCatalog";
 import ReadHero from "@/components/ReadHero";
+import Tilt from "@/components/Tilt";
 import { CHAPTER_PRICE, FREE_CHAPTERS_IN_PAID_MODE } from "@/lib/config";
 import { LANGS } from "@/lib/types";
 
@@ -39,8 +41,8 @@ export default async function ReadHome() {
 
       {progress.length > 0 && (
         <section aria-labelledby="cont">
-          <h2 id="cont" className="h-section mb-3">Pick up where you left off</h2>
-          <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-2">
+          <h2 id="cont" data-reveal="lines" className="h-section mb-3">Pick up where you left off</h2>
+          <div data-reveal="stagger" className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-2">
             {progress.map(({ p, s }) => (
               <Link key={s.id} href={`/read/${s.slug}/${p.chapter}?lang=${p.language}`} className="group w-[118px] shrink-0">
                 <Cover title={s.title} color={s.color} image={s.image} size="sm" />
@@ -55,15 +57,15 @@ export default async function ReadHome() {
 
       <section aria-labelledby="top">
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 id="top" className="h-section">Top 10 in India this month</h2>
+          <h2 id="top" data-reveal="lines" className="h-section">Top 10 in India this month</h2>
           <span className="text-[12.5px] text-muted">by chapters read</span>
         </div>
-        <ol className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 pb-2">
+        <ol data-reveal="stagger" className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 pb-3 pt-1">
           {trending.map((s, i) => (
             <li key={s.id} className="shrink-0">
               <Link href={`/read/${s.slug}`} className="flex items-end" aria-label={`Number ${i + 1}: ${s.title}`}>
-                <span aria-hidden className="-mr-4 font-display text-[92px] leading-[.78] text-transparent [-webkit-text-stroke:2.5px_rgb(var(--fg))]">{i + 1}</span>
-                <span className="relative w-[96px]"><Cover title={s.title} color={s.color} image={s.image} size="sm" /></span>
+                <span aria-hidden className="-mr-3.5 font-display text-[88px] leading-[.78] text-transparent [-webkit-text-stroke:1.5px_rgb(var(--fg)/.75)]">{i + 1}</span>
+                <Tilt className="w-[96px]"><Cover title={s.title} color={s.color} image={s.image} size="sm" /></Tilt>
               </Link>
             </li>
           ))}
@@ -71,6 +73,7 @@ export default async function ReadHome() {
       </section>
 
       <ReadCatalog items={items} />
+      <RevealScope />
     </div>
   );
 }

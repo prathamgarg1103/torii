@@ -4,6 +4,9 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import AppShell from "@/components/AppShell";
 import SWRegister from "@/components/SWRegister";
+import MotionProvider from "@/components/MotionProvider";
+import NavProgress from "@/components/NavProgress";
+import { Suspense } from "react";
 import { currentUser } from "@/lib/auth";
 import { read } from "@/lib/db";
 import { APP_NAME, APP_TAGLINE } from "@/lib/config";
@@ -25,6 +28,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-screen font-sans antialiased">
         <AppShell signedIn={!!user} cartCount={cartCount} wallet={user?.wallet ?? 0}>{children}</AppShell>
         <SWRegister />
+        <MotionProvider />
+        <Suspense fallback={null}><NavProgress /></Suspense>
       </body>
     </html>
   );

@@ -25,15 +25,15 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
   const tip = { contentStyle: { background: "rgb(var(--card))", border: "1px solid rgb(var(--line))", borderRadius: 12, fontSize: 12, color: "rgb(var(--fg))" } };
   const axis = { stroke: "rgb(var(--muted))", fontSize: 11, tickLine: false, axisLine: false } as const;
   const Card = ({ title, children, sub }: { title: string; sub?: string; children: React.ReactNode }) => (
-    <div className="card p-4"><div className="font-display text-[16px]">{title}</div>{sub && <div className="mb-2 mt-0.5 text-[12.5px] text-muted">{sub}</div>}{children}</div>
+    <div className="card p-4"><div className="text-[16px] font-bold tracking-[-0.02em]">{title}</div>{sub && <div className="mb-2 mt-0.5 text-[12.5px] text-muted">{sub}</div>}{children}</div>
   );
   const sortedSeries = [...bySeries].sort((a, b) => b.reads - a.reads).slice(0, 10);
   const salesSeries = [...bySeries].sort((a, b) => b.sales - a.sales).slice(0, 10);
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
-        {tiles.map(([l, v, s], k) => <div key={l} className={k === 4 ? "panel paper-band p-3.5" : "card p-3.5"}><div className="label">{l}</div><div className="price mt-1 text-[24px] leading-none">{v}</div><div className="mt-1 text-[12px] text-muted">{s}</div></div>)}
+      <div data-reveal="stagger" className="grid grid-cols-2 gap-2 md:grid-cols-5">
+        {tiles.map(([l, v, s], k) => <div key={l} className={k === 4 ? "panel paper-band p-3.5" : "card p-3.5"}><div className="label">{l}</div><div data-count className="price mt-1 text-[24px] leading-none">{v}</div><div className="mt-1 text-[12px] text-muted">{s}</div></div>)}
       </div>
 
       {opportunities.length > 0 && (
@@ -41,7 +41,7 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
           <div className="divide-y divide-line">
             {opportunities.map((o) => (
               <div key={o.series + o.lang} className="flex items-center gap-3 py-2 text-sm">
-                <span className="rounded-md border-2 border-ink bg-card px-2 py-0.5 text-[12px] font-bold dark:border-line">{o.lang}</span>
+                <span className="rounded-md border border-line bg-card px-2 py-0.5 text-[12px] font-bold dark:border-line">{o.lang}</span>
                 <span className="flex-1"><b>{o.series}</b> <span className="text-muted">in {o.states.join(" and ")}</span></span>
                 <span className="text-muted">{o.reads} reads</span>
               </div>
@@ -50,7 +50,7 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
         </Card>
       )}
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div data-reveal="stagger" className="grid gap-3 md:grid-cols-3">
         <Card title="Conversion funnel" sub="Free reading → paid chapters → printed volumes">
           <div className="space-y-2 pt-1">
             {funnel.map((f, i) => (
@@ -68,7 +68,7 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div data-reveal="stagger" className="grid gap-3 md:grid-cols-2">
         <Card title="Top series by reads">
           <div className="h-72"><ResponsiveContainer><BarChart data={sortedSeries} layout="vertical" margin={{ left: 8 }}><XAxis type="number" {...axis} /><YAxis type="category" dataKey="name" {...axis} width={110} /><Tooltip {...tip} /><Bar dataKey="reads" fill={C1} radius={[0, 4, 4, 0]} /></BarChart></ResponsiveContainer></div>
         </Card>
@@ -77,7 +77,7 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
         </Card>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div data-reveal="stagger" className="grid gap-3 md:grid-cols-3">
         <Card title="By language" sub="Chapter reads and paid unlocks">
           <div className="h-64"><ResponsiveContainer><BarChart data={byLang}><CartesianGrid stroke="rgb(var(--line))" vertical={false} /><XAxis dataKey="name" {...axis} /><YAxis {...axis} width={36} /><Tooltip {...tip} /><Legend wrapperStyle={{ fontSize: 12 }} /><Bar dataKey="reads" name="Reads" fill={C1} radius={[4, 4, 0, 0]} /><Bar dataKey="paid" name="Paid unlocks" fill={C3} radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div>
         </Card>

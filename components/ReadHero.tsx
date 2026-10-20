@@ -2,8 +2,9 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, reduced } from "@/lib/motion";
+import { EASE, EASE_IN, gsap, reduced, SplitText } from "@/lib/motion";
 import { Cover } from "./Art";
+import Tilt from "./Tilt";
 
 gsap.registerPlugin(useGSAP);
 type Item = { slug: string; title: string; author: string; publisher: string; color: string; synopsis: string; langs: string[]; chapters: number; image?: string };
@@ -11,68 +12,76 @@ type Item = { slug: string; title: string; author: string; publisher: string; co
 export default function ReadHero({ items, priceNote }: { items: Item[]; priceNote: string }) {
   const [i, setI] = useState(0);
   const root = useRef<HTMLElement>(null);
+  const busy = useRef(false);
   const touch = useRef(0);
   const it = items[i];
 
-  // The one orchestrated moment: speed lines burst, the jacket drops into place, the title sets.
+  const intro = (dir = 0) => {
+    const q = gsap.utils.selector(root);
+    const title = q("[data-title]")[0] as HTMLElement;
+    gsap.set(title, { visibility: "visible" });
+    const split = SplitText.create(title, { type: "words,chars", mask: "words" });
+    const tl = gsap.timeline({ defaults: { ease: EASE }, onComplete: () => { split.revert(); busy.current = false; } });
+    tl.fromTo(q("[data-jacket]"), { clipPath: dir ? (dir > 0 ? "inset(0% 0% 0% 100%)" : "inset(0% 100% 0% 0%)") : "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: dir ? 0.9 : 1.3 }, 0)
+      .from(q("[data-jacket] svg, [data-jacket] img"), { scale: 1.18, duration: dir ? 1.1 : 1.8 }, 0)
+      .from(split.chars, { yPercent: 110, duration: 1, stagger: 0.022 }, dir ? 0.1 : 0.25)
+      .fromTo(q("[data-fade]"), { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.07, clearProps: "transform" }, dir ? 0.25 : 0.55);
+    return tl;
+  };
+
   useGSAP(() => {
-    if (reduced()) return;
-    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-    tl.from("[data-burst] path", { scaleY: 0, transformOrigin: "50% 100%", opacity: 0, duration: 0.5, stagger: { each: 0.012, from: "center" } })
-      .from("[data-jacket]", { y: 60, rotate: 8, opacity: 0, duration: 0.7, ease: "back.out(1.4)" }, 0.1)
-      .from("[data-word]", { yPercent: 110, duration: 0.55, stagger: 0.06 }, 0.3)
-      .from("[data-fade]", { opacity: 0, y: 12, duration: 0.4, stagger: 0.06 }, 0.55);
+    if (reduced()) { gsap.set("[data-title]", { visibility: "visible" }); return; }
+    intro();
+    // Slow drift as the hero scrolls away.
+    gsap.to("[data-jacket-wrap]", { yPercent: 14, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: 0.6 } });
+    gsap.to("[data-copy]", { yPercent: 6, autoAlpha: 0.4, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: 0.6 } });
+    gsap.to("[data-tone]", { yPercent: -18, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: 0.6 } });
   }, { scope: root });
 
   const go = (n: number) => {
     const next = (n + items.length) % items.length;
+    if (next === i || busy.current) return;
     if (reduced() || !root.current) { setI(next); return; }
+    busy.current = true;
     const dir = n > i ? 1 : -1;
-    gsap.to(root.current.querySelectorAll("[data-jacket], [data-copy]"), {
-      x: -40 * dir, opacity: 0, duration: 0.18, ease: "power2.in",
-      onComplete: () => {
-        setI(next);
-        requestAnimationFrame(() => gsap.fromTo(root.current!.querySelectorAll("[data-jacket], [data-copy]"), { x: 40 * dir, opacity: 0 }, { x: 0, opacity: 1, duration: 0.35, ease: "power3.out", stagger: 0.05 }));
-      },
-    });
+    const q = gsap.utils.selector(root);
+    gsap.timeline({ defaults: { ease: EASE_IN }, onComplete: () => { setI(next); requestAnimationFrame(() => intro(dir)); } })
+      .to(q("[data-jacket]"), { clipPath: dir > 0 ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 100%)", duration: 0.45 }, 0)
+      .to(q("[data-title], [data-fade]"), { autoAlpha: 0, y: -14, duration: 0.3, stagger: 0.03 }, 0);
   };
 
   return (
     <section ref={root} aria-roledescription="carousel" aria-label="Featured series"
-      className="paper-band relative -mx-4 -mt-5 overflow-hidden border-b-2 border-ink px-4 pb-6 pt-6 dark:border-line"
+      className="paper-band bleed relative -mt-5 overflow-hidden px-4 pb-7 pt-7"
       onTouchStart={(e) => (touch.current = e.touches[0].clientX)}
       onTouchEnd={(e) => { const dx = e.changedTouches[0].clientX - touch.current; if (Math.abs(dx) > 50) go(i + (dx < 0 ? 1 : -1)); }}>
-      <div className="tone pointer-events-none absolute inset-0 opacity-60" />
-      <svg data-burst aria-hidden viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-0 h-full w-full text-ink/[.07] dark:text-white/[.05]">
-        {Array.from({ length: 36 }, (_, k) => { const a = (k / 36) * Math.PI * 2; const q = (n: number) => Math.round(n); return <path key={k} d={`M100 170 L${q(100 + Math.cos(a - 0.03) * 600)} ${q(170 + Math.sin(a - 0.03) * 600)} L${q(100 + Math.cos(a + 0.03) * 600)} ${q(170 + Math.sin(a + 0.03) * 600)}Z`} fill="currentColor" />; })}
-      </svg>
-
-      <div className="relative grid grid-cols-[42%_1fr] items-center gap-5 sm:grid-cols-[220px_1fr]">
-        <Link href={`/read/${it.slug}`} data-jacket className="block -rotate-[4deg] transition-transform hover:rotate-0" aria-label={`Open ${it.title}`}>
-          <Cover title={it.title} color={it.color} image={it.image} sub={it.publisher} size="lg" />
-        </Link>
+      <div data-tone className="tone pointer-events-none absolute -inset-y-16 inset-x-0 opacity-70" />
+      <div className="relative grid grid-cols-[41%_1fr] items-center gap-5 sm:grid-cols-[230px_1fr] sm:gap-8">
+        <div data-jacket-wrap>
+          <Tilt>
+            <Link href={`/read/${it.slug}`} data-jacket className="block overflow-hidden rounded-[8px]" aria-label={`Open ${it.title}`}>
+              <Cover title={it.title} color={it.color} sub={it.publisher} size="lg" image={it.image} />
+            </Link>
+          </Tilt>
+        </div>
         <div data-copy className="min-w-0">
-          <p data-fade className="mb-1 text-[13px] font-bold text-accent">#{i + 1} in India</p>
-          <h1 className="font-display text-[clamp(28px,8.5vw,46px)] leading-[0.98]">
-            {it.title.replace(/:.*/, "").split(" ").map((w, k) => (
-              <span key={k} className="inline-block overflow-hidden pb-1 align-bottom"><span data-word className="inline-block">{w}&nbsp;</span></span>
-            ))}
-          </h1>
-          <p data-fade className="mt-1 text-[14px] font-semibold text-muted">{it.author}</p>
-          <p data-fade className="mt-2 line-clamp-3 text-[14.5px] leading-snug">{it.synopsis}</p>
-          <div data-fade className="mt-4 flex flex-wrap items-center gap-2">
+          <p data-fade className="mb-2 text-[13px] font-semibold text-accent">Number {i + 1} in India this month</p>
+          <h1 key={it.slug} data-title className="js-hide font-display text-[clamp(30px,9vw,50px)] leading-[0.98] tracking-[-0.01em]">{it.title.replace(/:.*/, "")}</h1>
+          <p data-fade className="mt-2 text-[14px] font-medium text-muted">{it.author}</p>
+          <p data-fade className="mt-3 line-clamp-3 max-w-[38ch] text-[15px] leading-snug">{it.synopsis}</p>
+          <div data-fade className="mt-5 flex flex-wrap items-center gap-2">
             <Link href={`/read/${it.slug}/1`} className="btn-primary">Read chapter 1</Link>
             <Link href={`/read/${it.slug}`} className="btn-ghost">Details</Link>
           </div>
         </div>
       </div>
-
-      <div className="relative mt-5 flex items-center gap-3">
-        <p data-fade className="text-[13px] font-semibold">{priceNote}</p>
-        <div className="ml-auto flex items-center gap-1.5" role="tablist" aria-label="Choose featured series">
+      <div className="relative mt-6 flex items-center gap-3">
+        <p className="text-[13px] font-medium text-muted">{priceNote}</p>
+        <div className="ml-auto flex items-center gap-1" role="tablist" aria-label="Choose featured series">
           {items.map((x, k) => (
-            <button key={x.slug} role="tab" aria-selected={k === i} aria-label={x.title} onClick={() => go(k)}
-              className={`h-2.5 rounded-full border-2 border-ink transition-all dark:border-line ${k === i ? "w-7 bg-ink dark:bg-fg" : "w-2.5 bg-card"}`} />
+            <button key={x.slug} role="tab" aria-selected={k === i} aria-label={x.title} onClick={() => go(k)} className="group flex h-8 items-center px-1">
+              <span className={`block h-[3px] rounded-full transition-all duration-700 ease-out ${k === i ? "w-8 bg-fg" : "w-4 bg-fg/20 group-hover:bg-fg/40"}`} />
+            </button>
           ))}
         </div>
       </div>

@@ -34,7 +34,7 @@ const q = (n: number) => Math.round(n * 100) / 100;
 
 export function Cover({ title, color, sub, vol, size = "md", dim = false, image, className = "" }:
   { title: string; color: string; sub?: string; vol?: number; size?: "sm" | "md" | "lg"; dim?: boolean; image?: string; className?: string }) {
-  const wrapCls = `relative aspect-[2/3] w-full overflow-hidden rounded-[10px] border-2 border-ink bg-ink dark:border-line ${size !== "sm" ? "shadow-panel dark:shadow-none" : ""} ${dim ? "opacity-35 saturate-0" : ""} ${className}`;
+  const wrapCls = `relative aspect-[2/3] w-full overflow-hidden rounded-[8px] bg-ink ring-1 ring-inset ring-black/10 ${size === "sm" ? "shadow-panel-sm" : "shadow-panel"} ${dim ? "opacity-35 saturate-0" : ""} ${className}`;
   if (image) {
     // eslint-disable-next-line @next/next/no-img-element
     return <div className={wrapCls}><img src={image} alt={`${title} cover`} className="h-full w-full object-cover" loading="lazy" /></div>;

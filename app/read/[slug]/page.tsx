@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RevealScope from "@/components/RevealScope";
 import { notFound } from "next/navigation";
 import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
@@ -29,16 +30,16 @@ export default async function SeriesRead({ params, searchParams }: { params: { s
 
   return (
     <div className="space-y-7">
-      <section className="paper-band relative -mx-4 -mt-5 overflow-hidden border-b-2 border-ink px-4 pb-6 pt-6 dark:border-line">
-        <div className="tone pointer-events-none absolute inset-0 opacity-50" />
+      <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 pt-6 dark:border-line">
+        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative flex gap-5">
-          <div className="w-[38%] max-w-[170px] shrink-0 -rotate-2"><Cover title={s.title} color={s.color} image={s.image} sub={pub} size="lg" /></div>
+          <div data-parallax="28" className="w-[38%] max-w-[170px] shrink-0"><Cover title={s.title} color={s.color} image={s.image} sub={pub} size="lg" /></div>
           <div className="min-w-0 self-end">
             <h1 className="font-display text-[clamp(26px,7.5vw,40px)] leading-[1]">{s.title}</h1>
             <p className="mt-2 text-[14.5px] font-semibold">{s.author}</p>
             <p className="text-[13.5px] text-muted">{pub}, since {s.startYear}</p>
             <div className="mt-3 flex flex-wrap gap-1.5">
-              <span className="rounded-md border-2 border-ink bg-card px-2 py-0.5 text-[12px] font-bold dark:border-line">{s.status === "ongoing" ? "Ongoing" : "Completed"}</span>
+              <span className="rounded-md border border-line bg-card px-2 py-0.5 text-[12px] font-bold dark:border-line">{s.status === "ongoing" ? "Ongoing" : "Completed"}</span>
               {s.genres.map((g) => <span key={g} className="rounded-md bg-card/70 px-2 py-0.5 text-[12px] font-semibold">{g}</span>)}
             </div>
           </div>
@@ -61,13 +62,14 @@ export default async function SeriesRead({ params, searchParams }: { params: { s
         </div>
       </section>
 
-      <div className="grid grid-cols-3 gap-2 text-center">
+      <div data-reveal="stagger" className="grid grid-cols-3 gap-2 text-center">
         {[[s.totalChapters.toLocaleString("en-IN"), "chapters"], [String(s.totalVolumes), "printed volumes"], [lockedCount ? `₹${CHAPTER_PRICE}` : "Free", lockedCount ? "per paid chapter" : "to read now"]].map(([n, l]) => (
-          <div key={l} className="card py-3"><div className="price text-[22px] leading-none">{n}</div><div className="mt-1 text-[12px] text-muted">{l}</div></div>
+          <div key={l} className="card py-3"><div data-count={/\d/.test(n) ? "" : undefined} className="price text-[22px] leading-none">{n}</div><div className="mt-1 text-[12px] text-muted">{l}</div></div>
         ))}
       </div>
 
       <ChapterList slug={s.slug} lang={lang} rows={rows} readUpTo={prog?.chapter ?? 0} totalVolumes={s.totalVolumes} />
+      <RevealScope />
     </div>
   );
 }

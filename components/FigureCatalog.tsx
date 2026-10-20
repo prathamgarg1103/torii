@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { settleGrid } from "@/lib/motion";
 import { FigureArt } from "./Art";
 import { IconSearch } from "./Icons";
 
@@ -18,6 +19,9 @@ export default function FigureCatalog({ items }: { items: F[] }) {
     return (!t || i.name.toLowerCase().includes(t) || i.character.toLowerCase().includes(t)) && (!series || i.series === series) &&
       (!maker || i.manufacturer === maker) && inBand && (!scale || i.scale === scale) && (!avail || i.availability === avail);
   }), [items, q, series, maker, band, scale, avail]);
+  const grid = useRef<HTMLDivElement>(null);
+  const first = useRef(true);
+  useEffect(() => { if (first.current) { first.current = false; return; } settleGrid(grid.current); }, [list]);
 
   return (
     <section className="space-y-3">
@@ -36,12 +40,12 @@ export default function FigureCatalog({ items }: { items: F[] }) {
         <select className="input" value={scale} onChange={(e) => setScale(e.target.value)} aria-label="Scale"><option value="">Any scale</option>{uniq("scale").map((x) => <option key={x}>{x}</option>)}</select>
       </div>
       <div className="text-[13px] text-muted">{list.length} figures</div>
-      <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3">
+      <div ref={grid} data-reveal="stagger" className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3">
         {list.map((f) => (
           <Link key={f.slug} href={`/figures/${f.slug}`} className="group">
-            <div className="relative overflow-hidden rounded-panel border-2 border-ink dark:border-line">
-              <FigureArt color={f.color} name={f.name} image={f.image} rounded={false} className="transition-transform duration-300 group-hover:scale-[1.04]" />
-              {f.availability !== "in_stock" && <span className="absolute left-2 top-2 rounded-md border-2 border-ink bg-card px-1.5 py-0.5 text-[11.5px] font-black dark:border-line">{f.availability === "limited" ? `${f.left} of a numbered run left` : `Pre-order, ${f.releaseMonth}`}</span>}
+            <div className="relative overflow-hidden rounded-panel border border-line dark:border-line">
+              <FigureArt color={f.color} name={f.name} image={f.image} rounded={false} className="transition-transform duration-300 group-hover:scale-[1.04] duration-700 ease-out" />
+              {f.availability !== "in_stock" && <span className="absolute left-2 top-2 rounded-md border border-line bg-card px-1.5 py-0.5 text-[11.5px] font-black dark:border-line">{f.availability === "limited" ? `${f.left} of a numbered run left` : `Pre-order, ${f.releaseMonth}`}</span>}
             </div>
             <div className="mt-2 line-clamp-2 text-[14px] font-bold leading-tight">{f.name}</div>
             <div className="mt-0.5 truncate text-[12.5px] text-muted">{f.manufacturer}</div>

@@ -18,10 +18,10 @@ export default function LoginForm({ next }: { next: string }) {
   }
   return (
     <div className="mx-auto max-w-sm">
-      <section className="paper-band relative -mx-4 -mt-5 overflow-hidden border-b-2 border-ink px-4 pb-7 pt-8 text-center dark:border-line">
-        <div className="tone pointer-events-none absolute inset-0 opacity-50" />
+      <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-7 pt-8 text-center dark:border-line">
+        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative">
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-ink bg-[rgb(230,0,51)] text-white shadow-panel"><Torii className="h-8 w-8" /></span>
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-[rgb(230,0,51)] text-white shadow-panel"><Torii className="h-8 w-8" /></span>
           <h1 className="h-title mt-4">Sign in to Torii</h1>
           <p className="mt-1 text-[15px]">One account for reading, buying and your shelf.</p>
         </div>
@@ -49,7 +49,7 @@ export default function LoginForm({ next }: { next: string }) {
         </button>
         {step === "otp" && <button type="button" className="w-full text-[14px] font-semibold text-muted underline underline-offset-2" onClick={() => { setStep("phone"); setOtp(""); }}>Use a different number</button>}
       </form>
-      <div className="mt-6 rounded-panel border-2 border-dashed border-line p-4 text-[13.5px] leading-relaxed text-muted">
+      <div className="mt-6 rounded-panel border border-dashed border-line p-4 text-[13.5px] leading-relaxed text-muted">
         Trying the demo? Sign in as a fan with <b className="text-fg">9876543210</b> (₹50 in the wallet) or as the publisher with <b className="text-fg">9999999999</b>. Any other number makes a new account.
       </div>
     </div>

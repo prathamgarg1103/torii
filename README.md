@@ -85,7 +85,12 @@ The look borrows from Japanese manga weeklies, which are printed on coloured new
 
 - **Type:** Dela Gothic One (a Japanese-designed heavy display face) for headings and prices, Hanken Grotesk for everything else. Both are bundled through Fontsource, so nothing loads from Google at runtime.
 - **Artwork:** every cover is a generated manga-panel jacket (speed lines, screentone, halftone suns, ink gutters), and every figure is an abstract studio render. No copyrighted covers, characters or product photos are included.
-- **Motion (GSAP):** one orchestrated moment, the Read hero, where speed lines burst, the jacket drops in and the title sets. Everything else only moves in response to you: the bottom-nav highlight slides, items fly into the cart, sheets slide up, the lock pops open on unlock, and Verify stamps its verdict. Motion is switched off when the device asks for reduced motion.
+- **Motion (GSAP + ScrollTrigger + SplitText, Lenis, Tailwind):** one easing language throughout, long decelerating expo curves with no bounce or overshoot.
+  - **On load:** the Read hero opens its jacket with a clip-path wipe while the headline rises letter by letter from behind a mask. Swiping or tapping the dots changes slides with a directional wipe, and the hero drifts slowly as you scroll away.
+  - **On scroll:** headings rise line by line, cover grids and lists cascade in, and stats count up. Desktop gets Lenis smooth scrolling; phones keep native scrolling.
+  - **On interaction:** covers tilt slightly toward the cursor with a soft sheen (desktop only), the nav highlight glides between sections, and the header frosts and tightens as you scroll. "Add to cart" draws its check mark while the cart icon pulses. Sheets glide up, the unlock lock lifts its shackle, and Verify draws its seal around the result.
+  - **Between screens:** every screen eases in, a hairline progress bar runs across the top while the next screen loads, and the Read section shows shimmer skeletons.
+  - **Accessibility:** content waiting to scroll in stays focusable and clickable, and all motion switches off when the device asks for reduced motion.
 - Works in light and dark mode, with 44px+ tap targets and visible keyboard focus.
 
 ### Adding official artwork
@@ -94,7 +99,7 @@ Each series and figure has an optional `image` field, typed in `lib/types.ts` an
 
 ## Tech
 
-- Next.js 14 (App Router), TypeScript, Tailwind CSS, GSAP (with @gsap/react), Fontsource fonts
+- Next.js 14 (App Router), TypeScript, Tailwind CSS, GSAP (ScrollTrigger, SplitText, @gsap/react), Lenis, Fontsource fonts
 - PWA: manifest, icons, service worker with offline reading of opened chapters
 - Data: the catalogue is static and bundled from `data/catalog.json`. Everything that changes (accounts, carts, orders, unlocks, tags, settings, stock) is a small state document, stored in **Upstash Redis** when its env vars are set, or in `data/state.json` otherwise. Every read and write goes through `read()` / `mutate()` in `lib/db.ts`, so it can be swapped for Postgres in production.
 - Razorpay (test mode) with a mock fallback, `html5-qrcode` for camera scanning, `qrcode` for tag images, Recharts for the dashboard

@@ -38,11 +38,11 @@ export default function Reader(p: Props) {
   const nextHref = p.next ? `/read/${p.slug}/${p.next.number}?lang=${p.lang}` : null;
   const End = (
     <div className="mx-auto max-w-md space-y-3 px-4 py-8 text-center">
-      <div className="font-display text-[22px]">End of chapter {p.chapter}</div>
+      <div className="text-[22px] font-bold tracking-[-0.02em]">End of chapter {p.chapter}</div>
       {p.bridge && (
         <div data-section="manga" className="panel paper-band space-y-2 p-4 text-left">
           <div className="text-[13px] font-bold text-accent">You finished volume {p.bridge.number}</div>
-          <div className="font-display text-[20px] leading-tight">{p.bridge.owned ? `Volume ${p.bridge.number} is on your shelf` : `Own volume ${p.bridge.number} in print for ₹${p.bridge.price.toLocaleString("en-IN")}`}</div>
+          <div className="text-[20px] font-bold tracking-[-0.02em] leading-tight">{p.bridge.owned ? `Volume ${p.bridge.number} is on your shelf` : `Own volume ${p.bridge.number} in print for ₹${p.bridge.price.toLocaleString("en-IN")}`}</div>
           <p className="text-sm text-muted">{p.bridge.edition === "india" ? "Official India-printed edition with an authenticity tag." : "Official imported edition with an authenticity tag."}</p>
           {!p.bridge.owned && (
             <div className="flex gap-2">
