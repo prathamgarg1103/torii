@@ -7,32 +7,42 @@ import LogoutButton from "@/components/LogoutButton";
 import { inr } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Account" };
+export const metadata = { title: "You" };
 
 export default async function Account({ searchParams }: { searchParams: { denied?: string } }) {
   const user = await requireUser("/account");
   const db = await read();
   const orders = db.orders.filter((o) => o.userId === user.id).length;
   const unlocks = db.unlocks.filter((u) => u.userId === user.id).length;
+  const rows: [string, string, string][] = [
+    ["/orders", "Orders", orders ? `${orders} placed` : "None yet"],
+    ["/shelf", "My Shelf", `${unlocks} chapter${unlocks === 1 ? "" : "s"} unlocked`],
+    ["/verify", "Check a product", "Scan its code"],
+  ];
+  if (user.isAdmin) rows.push(["/publisher", "Publisher dashboard", "Sales and reading data"]);
   return (
-    <div className="space-y-4">
-      {searchParams.denied && <div className="rounded-xl bg-bad/10 px-3 py-2 text-sm text-bad">The publisher dashboard is for publisher accounts only.</div>}
-      <div className="card p-4">
-        <div className="text-lg font-extrabold">{user.name || "Torii reader"}</div>
-        <div className="text-sm text-muted">+91 {user.phone.replace(/(\d{5})(\d{5})/, "$1 $2")}{user.isAdmin && " · Publisher admin"}</div>
-      </div>
-      <div className="card p-4">
-        <div className="label">Wallet balance</div>
-        <div className="text-3xl font-extrabold">{inr(user.wallet)}</div>
-        <p className="mb-3 text-sm text-muted">Unlock chapters in one tap. Top up with UPI.</p>
+    <div className="space-y-6">
+      {searchParams.denied && <p className="rounded-xl border-2 border-bad/40 bg-bad/10 px-3 py-2.5 text-[14px] font-semibold text-bad">The publisher dashboard needs a publisher account.</p>}
+      <section className="paper-band relative -mx-4 -mt-5 overflow-hidden border-b-2 border-ink px-4 pb-6 pt-7 dark:border-line">
+        <div className="tone pointer-events-none absolute inset-0 opacity-50" />
+        <div className="relative">
+          <h1 className="font-display text-[clamp(28px,8vw,40px)] leading-none">{user.name || "Hello, reader"}</h1>
+          <p className="mt-2 text-[14.5px] font-semibold">+91 {user.phone.replace(/(\d{5})(\d{5})/, "$1 $2")}{user.isAdmin ? ", publisher account" : ""}</p>
+        </div>
+      </section>
+      <section aria-labelledby="wallet" className="panel p-5">
+        <h2 id="wallet" className="label">Wallet</h2>
+        <div className="price mt-1 text-[40px] leading-none">{inr(user.wallet)}</div>
+        <p className="mb-4 mt-2 text-[14px] text-muted">Pay for chapters in one tap. Add money with UPI.</p>
         <TopUp amounts={TOPUPS} />
-      </div>
-      <div className="card divide-y divide-line">
-        <Link href="/orders" className="flex justify-between px-4 py-3 text-sm"><span>Orders</span><span className="text-muted">{orders}</span></Link>
-        <Link href="/shelf" className="flex justify-between px-4 py-3 text-sm"><span>My Shelf</span><span className="text-muted">{unlocks} chapters unlocked</span></Link>
-        <Link href="/verify" className="flex justify-between px-4 py-3 text-sm"><span>Verify a product</span><span className="text-muted">Scan code</span></Link>
-        {user.isAdmin && <Link href="/publisher" className="flex justify-between px-4 py-3 text-sm font-semibold"><span>Publisher dashboard</span><span>→</span></Link>}
-      </div>
+      </section>
+      <nav className="card divide-y divide-line" aria-label="Your account">
+        {rows.map(([href, l, d]) => (
+          <Link key={href} href={href} className="flex min-h-[56px] items-center justify-between px-4 hover:bg-accentsoft/40">
+            <span className="font-bold">{l}</span><span className="text-[13.5px] text-muted">{d}</span>
+          </Link>
+        ))}
+      </nav>
       <LogoutButton />
     </div>
   );

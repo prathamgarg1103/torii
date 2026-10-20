@@ -23,7 +23,7 @@ export default async function Tags() {
   const recent = db.tags.filter((t) => !t.code.includes("GENUINE") && !t.code.includes("CLAIMED")).slice(-8).reverse();
   return (
     <div className="space-y-4">
-      <div><div className="label">Demo</div><h1 className="text-2xl font-extrabold">Authenticity tags</h1>
+      <div><div className="label">Demo</div><h1 className="h-title">Authenticity codes</h1>
         <p className="text-sm text-muted">Scan these with a phone camera, or open them in Verify. Re-run <code>npm run seed</code> to reset their state.</p></div>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {demo.map((d, i) => (
@@ -32,7 +32,7 @@ export default async function Tags() {
             <img src={qrs[i]} alt={d.label} className="mx-auto w-full max-w-[180px] rounded bg-white p-1" />
             <div className="mt-2 text-sm font-bold">{d.label}</div>
             <div className="text-xs text-muted">{d.note}</div>
-            <div className="mt-1 font-mono text-[10px]">{d.code}</div>
+            <div className="mt-1 font-semibold tracking-wide text-[10px]">{d.code}</div>
           </Link>
         ))}
       </div>
@@ -40,11 +40,11 @@ export default async function Tags() {
         <div className="card p-4">
           <div className="mb-2 font-bold">Recently minted (from orders)</div>
           <div className="divide-y divide-line text-sm">{recent.map((t) => (
-            <div key={t.code} className="flex justify-between gap-2 py-1.5"><span className="truncate">{t.title}{t.editionNo ? ` #${String(t.editionNo).padStart(4, "0")}` : ""}</span><span className="font-mono text-xs text-muted">{t.code}</span><span className={t.ownerId ? "text-ok" : "text-muted"}>{t.ownerId ? "registered" : "unregistered"}</span></div>
+            <div key={t.code} className="flex justify-between gap-2 py-1.5"><span className="truncate">{t.title}{t.editionNo ? ` #${String(t.editionNo).padStart(4, "0")}` : ""}</span><span className="font-semibold tracking-wide text-xs text-muted">{t.code}</span><span className={t.ownerId ? "text-ok" : "text-muted"}>{t.ownerId ? "registered" : "unregistered"}</span></div>
           ))}</div>
         </div>
       )}
-      <Link href="/publisher" className="btn-ghost">← Dashboard</Link>
+      <Link href="/publisher" className="btn-ghost">Back to the dashboard</Link>
     </div>
   );
 }

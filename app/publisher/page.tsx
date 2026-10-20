@@ -69,8 +69,8 @@ export default async function Publisher({ searchParams }: { searchParams: { pub?
     <div className="space-y-5">
       <div className="flex flex-wrap items-end gap-3">
         <div className="mr-auto">
-          <div className="label">Publisher dashboard · last 90 days</div>
-          <h1 className="text-2xl font-extrabold">What India is reading and buying</h1>
+          <div className="label">Publisher dashboard, last 90 days</div>
+          <h1 className="h-title mt-1">What India is reading and buying</h1>
         </div>
         <div className="no-scrollbar flex gap-2 overflow-x-auto">
           <Link href="/publisher" className={!pub ? "chip-on" : "chip"}>All publishers</Link>
@@ -82,8 +82,8 @@ export default async function Publisher({ searchParams }: { searchParams: { pub?
       <Dashboard kpis={kpis} bySeries={bySeries} byLang={byLang} byState={byState} trend={trend} topCities={topCities} opportunities={opportunities}
         scope={pub ? publisherName(db, pub) : "All publishers"} />
       <div className="flex flex-wrap gap-2 text-sm">
-        <Link href="/publisher/tags" className="btn-ghost">Demo authenticity tags →</Link>
-        <Link href="/read" className="btn-ghost">Open fan app →</Link>
+        <Link href="/publisher/tags" className="btn-ghost">Demo authenticity codes</Link>
+        <Link href="/read" className="btn-ghost">Open the fan app</Link>
       </div>
     </div>
   );

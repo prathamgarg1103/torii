@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Cover, FigureArt } from "./Art";
 
-type L = { id: string; kind: string; qty: number; title: string; subtitle: string; price: number; color: string; href: string };
+type L = { id: string; kind: string; qty: number; title: string; subtitle: string; price: number; color: string; href: string; image?: string };
 export default function CartLines({ lines }: { lines: L[] }) {
   const router = useRouter();
   const set = async (id: string, qty: number) => {
@@ -13,19 +13,19 @@ export default function CartLines({ lines }: { lines: L[] }) {
   return (
     <div className="space-y-2">
       {lines.map((l) => (
-        <div key={l.id} className="card flex gap-3 p-3">
-          <Link href={l.href} className="w-14 shrink-0">{l.kind === "figure" ? <FigureArt color={l.color} /> : <Cover title={l.title} color={l.color} size="sm" />}</Link>
+        <div key={l.id} className="card flex gap-3.5 p-3.5">
+          <Link href={l.href} className="w-16 shrink-0">{l.kind === "figure" ? <div className="overflow-hidden rounded-[10px] border-2 border-ink dark:border-line"><FigureArt color={l.color} name={l.title} rounded={false} /></div> : <Cover title={l.title} color={l.color} image={l.image} size="sm" />}</Link>
           <div className="min-w-0 flex-1">
-            <div className="line-clamp-2 text-sm font-semibold">{l.title}</div>
-            <div className="truncate text-xs text-muted">{l.subtitle}</div>
-            <div className="mt-1 flex items-center gap-2">
-              <span className="font-bold">₹{(l.price * l.qty).toLocaleString("en-IN")}</span>
-              <div className="ml-auto flex items-center rounded-lg border border-line">
-                <button className="px-2.5 py-1" onClick={() => set(l.id, l.qty - 1)} aria-label="Decrease">−</button>
-                <span className="w-6 text-center text-sm">{l.qty}</span>
-                <button className="px-2.5 py-1" onClick={() => set(l.id, l.qty + 1)} aria-label="Increase" disabled={l.kind === "box" && l.qty >= 3}>+</button>
+            <div className="line-clamp-2 font-bold leading-tight">{l.title}</div>
+            <div className="mt-0.5 truncate text-[13px] text-muted">{l.subtitle.replace(" · ", ", ")}</div>
+            <div className="mt-2 flex items-center gap-2">
+              <span className="price text-[17px]">₹{(l.price * l.qty).toLocaleString("en-IN")}</span>
+              <div className="ml-auto flex items-center rounded-xl border-2 border-ink dark:border-line">
+                <button className="h-9 w-9 text-lg font-bold" onClick={() => set(l.id, l.qty - 1)} aria-label="One fewer">−</button>
+                <span className="w-6 text-center font-bold">{l.qty}</span>
+                <button className="h-9 w-9 text-lg font-bold" onClick={() => set(l.id, l.qty + 1)} aria-label="One more" disabled={l.kind === "box" && l.qty >= 3}>+</button>
               </div>
-              <button className="text-xs text-muted underline" onClick={() => set(l.id, 0)}>Remove</button>
+              <button className="text-[13px] font-semibold text-muted underline underline-offset-2" onClick={() => set(l.id, 0)}>Remove</button>
             </div>
           </div>
         </div>

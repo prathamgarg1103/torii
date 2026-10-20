@@ -6,7 +6,7 @@ import { Cover } from "@/components/Art";
 import { inr } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Buy manga" };
+export const metadata = { title: "Manga" };
 
 export default async function MangaHome({ searchParams }: { searchParams: { pub?: string; q?: string } }) {
   const db = await read();
@@ -15,39 +15,47 @@ export default async function MangaHome({ searchParams }: { searchParams: { pub?
   const list = db.series
     .filter((s) => (!searchParams.pub || s.publisherId === searchParams.pub) && (!q || s.title.toLowerCase().includes(q) || s.author.toLowerCase().includes(q)))
     .sort((a, b) => b.popularity - a.popularity);
-  const boxes = db.boxSets.filter((b) => b.title.includes("Complete")).slice(0, 6);
+  const boxes = db.boxSets.filter((b) => b.title.includes("Complete"));
+  const filtered = !!(searchParams.pub || q);
 
   return (
-    <div className="space-y-6">
-      <section className="card overflow-hidden">
-        <div className="bg-accent px-4 py-4 text-white">
-          <div className="text-[11px] font-bold uppercase tracking-wider opacity-80">Printed in India · officially licensed</div>
-          <h1 className="mt-1 text-2xl font-extrabold leading-tight">Every series. Every volume. In order.</h1>
-          <p className="mt-1 text-sm opacity-90">India-printed editions from ₹299 — each with a scannable authenticity tag.</p>
+    <div className="space-y-8">
+      <section className="paper-band relative -mx-4 -mt-5 overflow-hidden border-b-2 border-ink px-4 pb-6 pt-7 dark:border-line">
+        <div className="tone pointer-events-none absolute inset-0 opacity-50" />
+        <div className="relative">
+          <h1 className="font-display text-[clamp(30px,9vw,48px)] leading-[0.98]">Every volume,<br />in order.</h1>
+          <p className="mt-3 max-w-[34ch] text-[15px] leading-snug">Printed in India from ₹299. Every copy carries a code you can scan to prove it's real.</p>
+          <form className="mt-5 flex gap-2" action="/manga">
+            <input name="q" defaultValue={searchParams.q} className="input" placeholder="Find a series or author" aria-label="Search" />
+            {searchParams.pub && <input type="hidden" name="pub" value={searchParams.pub} />}
+            <button className="btn-ink">Search</button>
+          </form>
         </div>
       </section>
 
-      <form className="flex gap-2" action="/manga">
-        <input name="q" defaultValue={searchParams.q} className="input" placeholder="Search series or author" aria-label="Search" />
-        {searchParams.pub && <input type="hidden" name="pub" value={searchParams.pub} />}
-        <button className="btn-primary">Search</button>
-      </form>
-      <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
+      <div className="no-scrollbar -mx-4 -mt-3 flex gap-2 overflow-x-auto px-4">
         <Link href="/manga" className={!searchParams.pub ? "chip-on" : "chip"}>All publishers</Link>
         {db.publishers.map((p) => <Link key={p.id} href={`/manga?pub=${p.id}`} className={searchParams.pub === p.id ? "chip-on" : "chip"}>{p.name}</Link>)}
       </div>
 
-      {!searchParams.pub && !q && (
-        <section>
-          <h2 className="mb-2 font-bold">Complete box sets</h2>
-          <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4">
+      {!filtered && (
+        <section aria-labelledby="box">
+          <h2 id="box" className="h-section mb-3">Whole series in one box</h2>
+          <div className="no-scrollbar -mx-4 flex gap-4 overflow-x-auto px-4 pb-3">
             {boxes.map((b) => {
               const s = db.series.find((x) => x.id === b.seriesId)!;
               return (
-                <Link key={b.id} href={`/manga/${s.slug}`} className="card w-60 shrink-0 p-3">
-                  <div className="flex gap-1">{[0, 1, 2].map((i) => <div key={i} className="w-1/3"><Cover title={s.title} color={s.color} size="sm" sub={`Vol. ${i + 1}`} /></div>)}</div>
-                  <div className="mt-2 text-sm font-bold">{b.title}</div>
-                  <div className="text-xs text-muted">Vol. {b.fromVol}–{b.toVol} · <span className="font-semibold text-accent">{inr(b.price)}</span></div>
+                <Link key={b.id} href={`/manga/${s.slug}`} className="group w-[220px] shrink-0">
+                  <div className="relative h-[170px] rounded-panel border-2 border-ink bg-card p-3 shadow-panel transition-transform group-hover:-translate-y-1 dark:border-line dark:shadow-none">
+                    <div className="flex h-full items-end gap-[2px] overflow-hidden">
+                      {Array.from({ length: Math.min(b.toVol, 16) }, (_, k) => (
+                        <div key={k} className="h-full flex-1 rounded-[2px] border border-ink/60" style={{ background: s.color, filter: `hue-rotate(${((k * 23) % 50) - 25}deg) brightness(${0.85 + (k % 3) * 0.08})` }} />
+                      ))}
+                    </div>
+                    <span className="absolute right-2 top-2 rounded-md border-2 border-ink bg-card px-1.5 text-[12px] font-black dark:border-line">{b.toVol} books</span>
+                  </div>
+                  <div className="mt-2 font-bold leading-tight">{s.title}</div>
+                  <div className="text-[13.5px]"><span className="price text-[16px]">{inr(b.price)}</span> <span className="text-muted">for the set</span></div>
                 </Link>
               );
             })}
@@ -55,28 +63,30 @@ export default async function MangaHome({ searchParams }: { searchParams: { pub?
         </section>
       )}
 
-      <section className="space-y-2">
+      <section aria-labelledby="series" className="space-y-3">
+        <h2 id="series" className="h-section">{filtered ? `${list.length} series found` : "Shop by series"}</h2>
         {list.map((s) => {
           const vols = db.volumes.filter((v) => v.seriesId === s.id);
           const minP = Math.min(...vols.map((v) => v.price));
           const owned = user ? ownedVolumes(db, user.id, s.id).size : 0;
           return (
-            <Link key={s.id} href={`/manga/${s.slug}`} className="card flex gap-3 p-3">
-              <div className="w-16 shrink-0"><Cover title={s.title} color={s.color} size="sm" /></div>
+            <Link key={s.id} href={`/manga/${s.slug}`} className="card flex items-center gap-4 p-3 transition-colors hover:border-ink dark:hover:border-fg/50">
+              <div className="w-[64px] shrink-0"><Cover title={s.title} color={s.color} image={s.image} size="sm" /></div>
               <div className="min-w-0 flex-1">
-                <div className="font-bold">{s.title}</div>
-                <div className="text-xs text-muted">{s.author} · {publisherName(db, s.publisherId)}</div>
-                <div className="mt-1 text-xs">{s.totalVolumes} volumes · from <span className="font-semibold text-accent">{inr(minP)}</span></div>
+                <div className="font-display text-[16px] leading-tight">{s.title}</div>
+                <div className="mt-0.5 text-[13px] text-muted">{s.author}, {publisherName(db, s.publisherId)}</div>
+                <div className="mt-1.5 text-[13.5px]"><span className="font-bold">{s.totalVolumes} volumes</span> from <span className="price">{inr(minP)}</span></div>
                 {owned > 0 && (
-                  <div className="mt-1.5 flex items-center gap-2 text-[11px]">
-                    <div className="h-1.5 flex-1 overflow-hidden rounded bg-line"><div className="h-full bg-accent" style={{ width: `${(owned / s.totalVolumes) * 100}%` }} /></div>
-                    You own {owned}/{s.totalVolumes}
+                  <div className="mt-2 flex items-center gap-2 text-[12px] font-semibold">
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-accent" style={{ width: `${(owned / s.totalVolumes) * 100}%` }} /></div>
+                    {owned} owned
                   </div>
                 )}
               </div>
             </Link>
           );
         })}
+        {!list.length && <div className="panel p-6 text-center"><p className="font-bold">No series match “{searchParams.q}”.</p><Link href="/manga" className="btn-ghost mt-3">Show all series</Link></div>}
       </section>
     </div>
   );

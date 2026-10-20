@@ -22,14 +22,14 @@ export default async function OrderPage({ params, searchParams }: { params: { id
   return (
     <div className="space-y-4">
       {searchParams.new && (
-        <div className="card flex items-center gap-3 p-4">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-ok text-white"><IconCheck /></span>
-          <div><div className="font-extrabold">Order placed</div><div className="text-sm text-muted">Arrives {o.eta}. Paid via UPI.</div></div>
+        <div className="panel paper-band flex items-center gap-3 p-4">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-ok text-white"><IconCheck className="h-6 w-6" /></span>
+          <div><div className="font-display text-[19px] leading-tight">Order placed</div><div className="text-[14px]">Paid with UPI. Arrives {o.eta}.</div></div>
         </div>
       )}
-      <div className="card space-y-2 p-4 text-sm">
-        <div className="flex justify-between"><span className="font-bold">Order #{o.id}</span><span className="text-ok">{o.status}</span></div>
-        <div className="text-muted">{fmtDate(o.createdAt)} · Payment ref {o.paymentRef}</div>
+      <div className="card space-y-2 p-4 text-[14.5px]">
+        <div className="flex justify-between"><span className="font-bold">Order {o.id}</span><span className="font-bold text-ok">{o.status}</span></div>
+        <div className="text-[13px] text-muted">Placed {fmtDate(o.createdAt)}. Payment reference {o.paymentRef}.</div>
         <div>{o.name}, {o.address}, {o.city ? `${o.city} region, ` : ""}{o.state} {o.pincode}</div>
         <div className="divide-y divide-line border-t border-line pt-1">
           {o.items.map((i) => (
@@ -39,18 +39,18 @@ export default async function OrderPage({ params, searchParams }: { params: { id
             </div>
           ))}
         </div>
-        <div className="flex justify-between border-t border-line pt-2 text-base font-extrabold"><span>Total</span><span>{inr(o.total)}</span></div>
+        <div className="flex items-center justify-between border-t border-line pt-2 font-bold"><span>Total</span><span className="price text-[20px]">{inr(o.total)}</span></div>
       </div>
       <section>
-        <h2 className="font-bold">Authenticity tags in your parcel</h2>
-        <p className="mb-2 text-xs text-muted">In production these are printed on the hang-tag or inside cover. For the demo, scan one with another phone or open it in Verify.</p>
+        <h2 className="h-section">Authenticity codes in your parcel</h2>
+        <p className="mb-3 mt-1 text-[13.5px] text-muted">Each item ships with one of these on its tag or inside cover. For this demo, scan one with another phone, or tap it.</p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {codes.slice(0, 24).map((c, i) => (
-            <Link key={c.code} href={`/verify?code=${c.code}`} className="card p-2 text-center">
+            <Link key={c.code} href={`/verify?code=${c.code}`} className="card p-2.5 text-center hover:border-ink">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={qrs[i]} alt={`QR for ${c.title}`} className="mx-auto w-full max-w-[150px] rounded bg-white p-1" />
               <div className="mt-1 line-clamp-1 text-[11px] font-semibold">{c.title}{c.tag?.editionNo ? ` #${String(c.tag.editionNo).padStart(4, "0")}` : ""}</div>
-              <div className="font-mono text-[10px] text-muted">{c.code}</div>
+              <div className="text-[10.5px] font-semibold tracking-wide text-muted">{c.code}</div>
             </Link>
           ))}
         </div>

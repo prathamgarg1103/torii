@@ -9,8 +9,8 @@ export default function TopUp({ amounts }: { amounts: number[] }) {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">{amounts.map((a) => <button key={a} className={amt === a ? "chip-on" : "chip"} onClick={() => setAmt(a)}>₹{a}</button>)}</div>
-      <PayButton purpose="topup" payload={{ amount: amt }} onSuccess={(r) => { setDone(`Added ₹${amt}. New balance ₹${r.wallet}`); router.refresh(); }}>Add ₹{amt} with UPI</PayButton>
-      {done && <p className="text-sm text-ok">{done}</p>}
+      <PayButton purpose="topup" className="btn-ink w-full" payload={{ amount: amt }} onSuccess={(r) => { setDone(`Added ₹${amt}. Your balance is now ₹${r.wallet}.`); router.refresh(); }}>Add ₹{amt} with UPI</PayButton>
+      {done && <p className="text-[14px] font-semibold text-ok">{done}</p>}
     </div>
   );
 }

@@ -27,52 +27,73 @@ export default async function SeriesShop({ params }: { params: { slug: string } 
   const boxes = db.boxSets.filter((b) => b.seriesId === s.id);
   const prog = user ? db.progress.find((p) => p.userId === user.id && p.seriesId === s.id) : undefined;
   const readVol = prog ? db.chapters.find((c) => c.seriesId === s.id && c.number === prog.chapter)?.volumeNumber ?? 0 : 0;
+  const pct = Math.round((owned.size / s.totalVolumes) * 100);
+  const minPrice = Math.min(...vols.map((v) => v.price));
 
   return (
-    <div className="space-y-5">
-      <div className="flex gap-4">
-        <div className="w-28 shrink-0"><Cover title={s.title} color={s.color} sub="Vol. 1" /></div>
-        <div className="space-y-1">
-          <h1 className="h-title">{s.title}</h1>
-          <div className="text-sm text-muted">{s.author} · {publisherName(db, s.publisherId)}</div>
-          <div className="text-sm">{s.totalVolumes} volumes · {s.status === "ongoing" ? "Ongoing" : "Completed"}</div>
-          {user && <div className="text-sm font-semibold text-accent">You own {owned.size} of {s.totalVolumes}</div>}
-          <Link href={`/read/${s.slug}`} data-section="read" className="inline-block text-sm font-semibold text-accent underline">Read it first →</Link>
+    <div className="space-y-7">
+      <section className="paper-band relative -mx-4 -mt-5 overflow-hidden border-b-2 border-ink px-4 pb-6 pt-6 dark:border-line">
+        <div className="tone pointer-events-none absolute inset-0 opacity-50" />
+        <div className="relative flex items-end gap-4">
+          <div className="relative h-[190px] w-[150px] shrink-0">
+            {[3, 2, 1].map((n, k) => (
+              <div key={n} className="absolute bottom-0 w-[112px]" style={{ left: k * 18, transform: `rotate(${(k - 1) * 4}deg)`, zIndex: k }}>
+                <Cover title={s.title} color={s.color} image={s.image} vol={n} size="sm" />
+              </div>
+            ))}
+          </div>
+          <div className="min-w-0 pb-1">
+            <h1 className="font-display text-[clamp(24px,7vw,38px)] leading-[1]">{s.title}</h1>
+            <p className="mt-2 text-[14px] font-semibold">{s.author}</p>
+            <p className="text-[13.5px] text-muted">{publisherName(db, s.publisherId)}. {s.totalVolumes} volumes, from {inr(minPrice)}.</p>
+          </div>
         </div>
-      </div>
+        {user && (
+          <div className="relative mt-5">
+            <div className="mb-1.5 flex justify-between text-[13px] font-bold"><span>Your collection</span><span>{owned.size} of {s.totalVolumes}</span></div>
+            <div className="h-3 overflow-hidden rounded-full border-2 border-ink bg-card dark:border-line"><div className="h-full bg-accent transition-all" style={{ width: `${Math.max(pct, owned.size ? 2 : 0)}%` }} /></div>
+          </div>
+        )}
+      </section>
 
       {readVol > 0 && owned.size < readVol && (
-        <div className="rounded-xl bg-accentsoft px-3 py-2.5 text-sm text-accent">
-          You've read up to chapter {prog!.chapter} (Volume {readVol}){owned.size ? ` but own ${owned.size} volume${owned.size > 1 ? "s" : ""}` : " but don't own any volumes yet"}.
-        </div>
+        <p className="rounded-panel border-2 border-accent/40 bg-accentsoft px-4 py-3 text-[14.5px] font-semibold text-accent">
+          You've read to chapter {prog!.chapter}, which is volume {readVol}. {owned.size ? `You own ${owned.size} so far.` : "You don't own any of these books yet."}
+        </p>
       )}
 
       {missing.length > 0 && (
-        <div className="card flex items-center gap-3 p-3">
-          <div className="flex-1 text-sm"><div className="font-bold">Complete your shelf</div><div className="text-muted">{missing.length} missing volume{missing.length > 1 ? "s" : ""} in stock · {inr(missingTotal)}</div></div>
-          <AddToCart items={missing.map((v) => ({ kind: "volume", refId: v.id }))} label={`Add ${missing.length} missing`} signedIn={!!user} className="btn-primary" />
+        <div className="panel flex items-center gap-3 p-4">
+          <div className="min-w-0 flex-1">
+            <div className="font-display text-[17px] leading-tight">{owned.size ? "Fill the gaps" : "Start the collection"}</div>
+            <div className="text-[13.5px] text-muted">{missing.length} volume{missing.length > 1 ? "s" : ""} in stock for {inr(missingTotal)}</div>
+          </div>
+          <AddToCart items={missing.map((v) => ({ kind: "volume", refId: v.id }))} label={`Add ${missing.length}`} signedIn={!!user} className="btn-primary" />
         </div>
       )}
 
       {boxes.length > 0 && (
-        <div className="space-y-2">
+        <section aria-labelledby="boxes" className="space-y-2">
+          <h2 id="boxes" className="h-section">Box sets</h2>
           {boxes.map((b) => {
             const full = vols.filter((v) => v.number >= b.fromVol && v.number <= b.toVol).reduce((a, v) => a + v.price, 0);
             return (
-              <div key={b.id} className="card flex items-center gap-3 p-3">
-                <div className="flex-1 text-sm">
+              <div key={b.id} className="card flex items-center gap-3 p-3.5">
+                <div className="min-w-0 flex-1">
                   <div className="font-bold">{b.title}</div>
-                  <div className="text-muted">Vol. {b.fromVol}–{b.toVol} · <span className="font-semibold text-accent">{inr(b.price)}</span> <span className="line-through">{inr(full)}</span></div>
+                  <div className="text-[13.5px]"><span className="price text-[16px]">{inr(b.price)}</span> <span className="text-muted line-through">{inr(full)}</span> <span className="font-bold text-ok">save {inr(full - b.price)}</span></div>
                 </div>
                 <AddToCart kind="box" refId={b.id} label="Add" signedIn={!!user} className="btn-ghost" />
               </div>
             );
           })}
-        </div>
+        </section>
       )}
 
       <VolumeGrid title={s.title} color={s.color} signedIn={!!user}
         vols={vols.map((v) => ({ id: v.id, number: v.number, price: v.price, edition: v.edition, stock: v.stock, owned: owned.has(v.number), inCart: inCart.has(v.id) }))} />
+
+      <Link href={`/read/${s.slug}`} data-section="read" className="btn-ghost w-full">Read {s.title.replace(/:.*/, "")} online first</Link>
     </div>
   );
 }

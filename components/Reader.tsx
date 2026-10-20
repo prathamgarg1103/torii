@@ -38,11 +38,11 @@ export default function Reader(p: Props) {
   const nextHref = p.next ? `/read/${p.slug}/${p.next.number}?lang=${p.lang}` : null;
   const End = (
     <div className="mx-auto max-w-md space-y-3 px-4 py-8 text-center">
-      <div className="label">End of chapter {p.chapter}</div>
+      <div className="font-display text-[22px]">End of chapter {p.chapter}</div>
       {p.bridge && (
-        <div data-section="manga" className="card space-y-2 p-4 text-left">
-          <div className="label text-accent">You finished Volume {p.bridge.number}</div>
-          <div className="text-lg font-extrabold">{p.bridge.owned ? `You own Volume ${p.bridge.number} in print` : `Own this volume in print — ₹${p.bridge.price.toLocaleString("en-IN")}`}</div>
+        <div data-section="manga" className="panel paper-band space-y-2 p-4 text-left">
+          <div className="text-[13px] font-bold text-accent">You finished volume {p.bridge.number}</div>
+          <div className="font-display text-[20px] leading-tight">{p.bridge.owned ? `Volume ${p.bridge.number} is on your shelf` : `Own volume ${p.bridge.number} in print for ₹${p.bridge.price.toLocaleString("en-IN")}`}</div>
           <p className="text-sm text-muted">{p.bridge.edition === "india" ? "Official India-printed edition with an authenticity tag." : "Official imported edition with an authenticity tag."}</p>
           {!p.bridge.owned && (
             <div className="flex gap-2">
@@ -54,7 +54,7 @@ export default function Reader(p: Props) {
       )}
       {nextHref ? (
         <Link href={nextHref} className="btn-primary w-full">
-          {p.next!.locked ? <><IconLock className="h-4 w-4" /> Chapter {p.next!.number} · ₹9</> : `Next: Chapter ${p.next!.number}`}
+          {p.next!.locked ? <><IconLock className="h-4 w-4" /> Unlock chapter {p.next!.number} for ₹9</> : `Next chapter: ${p.next!.number}`}
         </Link>
       ) : (
         <div className="text-sm text-muted">You're all caught up. New chapters arrive soon after Japan.</div>

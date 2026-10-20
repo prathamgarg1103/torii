@@ -1,3 +1,5 @@
+import "@fontsource/dela-gothic-one/400.css";
+import "@fontsource-variable/hanken-grotesk";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import AppShell from "@/components/AppShell";
@@ -7,13 +9,13 @@ import { read } from "@/lib/db";
 import { APP_NAME, APP_TAGLINE } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: { default: APP_NAME, template: `%s · ${APP_NAME}` },
+  title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
   description: APP_TAGLINE,
   manifest: "/manifest.webmanifest",
   icons: { icon: "/icon-192.png", apple: "/icon-192.png" },
   appleWebApp: { capable: true, title: APP_NAME, statusBarStyle: "default" },
 };
-export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#c8282b" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#1a1625" };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser();

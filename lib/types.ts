@@ -12,6 +12,8 @@ export interface Series {
   id: string; slug: string; title: string; author: string; publisherId: string;
   genres: string[]; status: "ongoing" | "completed"; synopsis: string; color: string;
   languages: Lang[]; popularity: number; totalChapters: number; totalVolumes: number; startYear: number;
+  /** Optional official cover art supplied by the publisher (URL). Falls back to generated art. */
+  image?: string;
 }
 export interface Chapter {
   id: string; seriesId: string; number: number; volumeNumber: number; title: string; pages: number;
@@ -23,6 +25,8 @@ export interface Figure {
   id: string; slug: string; name: string; seriesId: string; character: string; manufacturer: string; licensor: string;
   price: number; scale: string; heightCm: number; material: string; availability: "in_stock" | "preorder" | "limited";
   editionSize: number | null; editionSold: number; releaseMonth: string | null; color: string; stock: number;
+  /** Optional official product photo supplied by the licensor (URL). Falls back to a generated render. */
+  image?: string;
 }
 export interface User { id: string; phone: string; name: string | null; wallet: number; isAdmin: boolean; createdAt: string; }
 export interface Unlock { userId: string; chapterId: string; createdAt: string; }

@@ -47,15 +47,15 @@ The codes above match the default `TAG_SECRET` in `.env`. If you change the secr
 
 ## How to flip reading from free to paid
 
-Sign in as the admin → `/publisher` → **Reading mode** → *Paid · ₹9/chapter*. In paid mode, the first 3 chapters of every series stay free, and the rest show a lock with "Unlock for ₹9" (wallet or UPI). Once unlocked, a chapter stays unlocked forever. **Per-chapter override** on the same screen makes any single chapter always free or always paid.
+Sign in as the admin → `/publisher` → **Reading mode** → *Paid, ₹9 a chapter*. In paid mode, the first 3 chapters of every series stay free, and the rest show a lock with "Unlock for ₹9" (wallet or UPI). Once unlocked, a chapter stays unlocked forever. **Per-chapter override** on the same screen makes any single chapter always free or always paid.
 
 ## 2-minute demo script
 
 1. **Browse.** Open `/read`. Filter by publisher or language and search "titan". Note that every series, from four publishers, is in one place.
-2. **Read free.** Sign in as the fan, open *One Piece*, and tap **Start reading**. Tap the page to show the controls, then switch Scroll ↔ Pages or change the language.
-3. **Flip to paid.** In a second browser window, sign in as the admin → `/publisher` → *Paid · ₹9/chapter*.
-4. **Unlock for ₹9.** As the fan, open *One Piece* chapter 5. It's locked: tap **Unlock from wallet**. Open chapter 6 and pay with **UPI** to show the checkout.
-5. **Read → buy print.** Open *Jujutsu Kaisen* chapter 9, unlock it and scroll to the end. The card says you've finished Volume 1, with **Own this volume in print — ₹349 → Add to cart**.
+2. **Read free.** Sign in as the fan, open *One Piece*, and tap **Start with chapter 1**. Tap the page to show the controls, then switch Scroll ↔ Pages or change the language.
+3. **Flip to paid.** In a second browser window, sign in as the admin → `/publisher` → *Paid, ₹9 a chapter*.
+4. **Unlock for ₹9.** As the fan, open *One Piece* chapter 5. It's locked: tap **Unlock with wallet**. Open chapter 6 and pay with **UPI** to show the checkout.
+5. **Read → buy print.** Open *Jujutsu Kaisen* chapter 9, unlock it and scroll to the end. The card says you've finished Volume 1, with **Own volume 1 in print for ₹349**, with Add to cart.
 6. **Buy a figure.** Go to Figures → *Ryomen Sukuna 1/7 Scale Limited* (it shows the next number, e.g. #0307 of 500) → Add to cart.
 7. **Checkout.** Open Cart → Checkout and enter pincode `151001`. The app shows the delivery estimate for the Ludhiana region. Pay with UPI. The order page shows the edition number and one QR authenticity tag per item.
 8. **Verify.** Tap a QR (or scan it with another phone). It shows **Genuine** and registers to you. Then try `T1-CLAIMED1-EBFEJQK8` (already registered) and `T1-FAKE7777-ABCDEFGH` (fake).
@@ -79,9 +79,22 @@ The server creates a Razorpay order and verifies the payment signature before it
 
 Each code is `T1-<serial>-<signature>`, where the signature is an HMAC-SHA256 of the serial using a server-only secret. A counterfeiter can't generate valid codes. If they copy a real one, the second scan shows *already registered in <city> on <date>*. Codes are minted per unit at checkout. In production they would be printed on hang-tags and inside covers.
 
+## Design
+
+The look borrows from Japanese manga weeklies, which are printed on coloured newsprint with each section on its own paper stock. Torii does the same: **Read** is sakura pink, **Manga** is blue, **Figures** is yellow and **Shelf** is green, all on a cool newsprint base with violet-black ink and one print-crimson accent.
+
+- **Type:** Dela Gothic One (a Japanese-designed heavy display face) for headings and prices, Hanken Grotesk for everything else. Both are bundled through Fontsource, so nothing loads from Google at runtime.
+- **Artwork:** every cover is a generated manga-panel jacket (speed lines, screentone, halftone suns, ink gutters), and every figure is an abstract studio render. No copyrighted covers, characters or product photos are included.
+- **Motion (GSAP):** one orchestrated moment, the Read hero, where speed lines burst, the jacket drops in and the title sets. Everything else only moves in response to you: the bottom-nav highlight slides, items fly into the cart, sheets slide up, the lock pops open on unlock, and Verify stamps its verdict. Motion is switched off when the device asks for reduced motion.
+- Works in light and dark mode, with 44px+ tap targets and visible keyboard focus.
+
+### Adding official artwork
+
+Each series and figure has an optional `image` field, typed in `lib/types.ts` and set in `data/catalog.json`. Put an image URL there (for example from a publisher's licensing portal) and it replaces the generated art everywhere that item appears.
+
 ## Tech
 
-- Next.js 14 (App Router), TypeScript, Tailwind CSS
+- Next.js 14 (App Router), TypeScript, Tailwind CSS, GSAP (with @gsap/react), Fontsource fonts
 - PWA: manifest, icons, service worker with offline reading of opened chapters
 - Data: the catalogue is static and bundled from `data/catalog.json`. Everything that changes (accounts, carts, orders, unlocks, tags, settings, stock) is a small state document, stored in **Upstash Redis** when its env vars are set, or in `data/state.json` otherwise. Every read and write goes through `read()` / `mutate()` in `lib/db.ts`, so it can be swapped for Postgres in production.
 - Razorpay (test mode) with a mock fallback, `html5-qrcode` for camera scanning, `qrcode` for tag images, Recharts for the dashboard
@@ -113,7 +126,7 @@ Camera scanning needs HTTPS, which all of these hosts provide.
 ## What's simulated
 
 - OTP SMS (always `123456`) and the mock UPI checkout
-- Manga pages, covers and figure images are generated placeholders. No copyrighted artwork is included.
+- Manga pages, covers and figure images are generated placeholders. No copyrighted artwork is included (see "Adding official artwork").
 - Chapter and volume counts are approximate.
 - Analytics are seeded demo data; real activity in the app is added on top.
 - Pincode → region lookup is approximate (first two digits).

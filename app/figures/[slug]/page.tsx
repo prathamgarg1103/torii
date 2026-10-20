@@ -4,6 +4,7 @@ import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { FigureArt } from "@/components/Art";
 import AddToCart from "@/components/AddToCart";
+import Gallery from "@/components/Gallery";
 import { IconShield } from "@/components/Icons";
 import { inr } from "@/lib/format";
 
@@ -24,53 +25,51 @@ export default async function FigurePage({ params }: { params: { slug: string } 
   const owned = user ? db.ownership.some((o) => o.userId === user.id && o.kind === "figure" && o.refId === f.id) : false;
   const related = db.figures.filter((x) => x.seriesId === f.seriesId && x.id !== f.id).slice(0, 4);
   const specs: [string, string][] = [
-    ["Series", s.title], ["Character", f.character], ["Manufacturer", f.manufacturer], ["Licensor", f.licensor],
+    ["Series", s.title], ["Character", f.character], ["Made by", f.manufacturer], ["Licensed by", f.licensor],
     ["Scale", f.scale], ["Height", `${f.heightCm} cm`], ["Material", f.material],
-    ["Availability", f.availability === "preorder" ? `Pre-order · releases ${f.releaseMonth}` : f.availability === "limited" ? `Limited edition of ${f.editionSize}` : "In stock"],
   ];
+  const status = f.availability === "preorder" ? `Pre-order, ships ${f.releaseMonth}` : f.availability === "limited" ? `Limited to ${f.editionSize} numbered pieces` : f.stock < 15 ? `In stock, ${f.stock} left` : "In stock";
 
   return (
-    <div className="space-y-5">
-      <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4">
-        {[["Front", 0], ["Side", 1], ["Box", 2]].map(([l, v]) => (
-          <div key={l} className="w-[85%] shrink-0 snap-center sm:w-[45%]"><FigureArt color={f.color} variant={v as number} label={String(l)} /></div>
-        ))}
-      </div>
-      <div className="space-y-1.5">
+    <div className="space-y-6">
+      <Gallery color={f.color} name={f.name} />
+      <div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-ok/15 px-2.5 py-1 text-[11px] font-bold text-ok"><IconShield className="h-3.5 w-3.5" /> Official licensed product</span>
-          {f.availability === "limited" && <span className="rounded-full bg-accent px-2.5 py-1 text-[11px] font-bold text-white">#{String(f.editionSold + 1).padStart(4, "0")} of {f.editionSize}</span>}
+          <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-ok/50 bg-ok/10 px-2.5 py-1 text-[12.5px] font-bold text-ok"><IconShield className="h-4 w-4" />Official, licensed</span>
+          {f.availability === "limited" && <span className="rounded-full border-2 border-ink bg-ink px-2.5 py-1 text-[12.5px] font-bold text-white dark:border-fg">Yours would be #{String(f.editionSold + 1).padStart(4, "0")}</span>}
         </div>
-        <h1 className="h-title">{f.name}</h1>
-        <div className="text-sm text-muted">{s.title} · {f.manufacturer}</div>
-        <div className="text-2xl font-extrabold text-accent">{inr(f.price)}</div>
+        <h1 className="h-title mt-3">{f.name}</h1>
+        <p className="mt-1 text-[14.5px] text-muted">{s.title}, by {f.manufacturer}</p>
+        <div className="mt-3 flex items-end justify-between gap-3">
+          <div className="price text-[34px] leading-none">{inr(f.price)}</div>
+          <div className="text-right text-[13px] font-semibold">{status}</div>
+        </div>
         {f.availability === "limited" && left !== null && (
-          <div className="space-y-1">
-            <div className="h-2 overflow-hidden rounded bg-line"><div className="h-full bg-accent" style={{ width: `${(f.editionSold / f.editionSize!) * 100}%` }} /></div>
-            <div className="text-xs text-muted">{left} of {f.editionSize} numbered pieces left. Your number is assigned at checkout.</div>
+          <div className="mt-3">
+            <div className="h-3 overflow-hidden rounded-full border-2 border-ink bg-card dark:border-line"><div className="h-full bg-accent" style={{ width: `${(f.editionSold / f.editionSize!) * 100}%` }} /></div>
+            <p className="mt-1.5 text-[13px] text-muted">{left} of {f.editionSize} left. Your number is assigned when you pay.</p>
           </div>
         )}
       </div>
-      <div className="flex gap-2">
-        <AddToCart kind="figure" refId={f.id} signedIn={!!user} className="btn-primary flex-1" disabled={soldOut}
-          label={soldOut ? "Sold out" : f.availability === "preorder" ? `Pre-order · ${inr(f.price)}` : "Add to cart"} />
-      </div>
-      {owned && <div className="rounded-xl bg-accentsoft px-3 py-2 text-sm text-accent">This figure is on your shelf.</div>}
-      <div className="card divide-y divide-line">
-        {specs.map(([k, v]) => <div key={k} className="flex justify-between gap-4 px-3 py-2.5 text-sm"><span className="text-muted">{k}</span><span className="text-right font-medium">{v}</span></div>)}
-      </div>
-      <div className="card flex items-start gap-3 p-3 text-sm">
-        <IconShield className="mt-0.5 h-5 w-5 shrink-0 text-ok" />
-        <div>Every box ships with a unique, signed Torii code. Scan it in <Link href="/verify" className="font-semibold underline">Verify</Link> to confirm it's genuine and register it to your shelf. A copied code shows up as already registered.</div>
+      <AddToCart kind="figure" refId={f.id} signedIn={!!user} className="btn-primary w-full text-[16px]" disabled={soldOut}
+        label={soldOut ? "Sold out" : f.availability === "preorder" ? `Pre-order for ${inr(f.price)}` : `Add to cart, ${inr(f.price)}`} />
+      {owned && <p className="rounded-xl bg-accentsoft px-3 py-2.5 text-[14px] font-semibold text-accent">This figure is already on your shelf.</p>}
+      <dl className="card divide-y divide-line">
+        {specs.map(([k, v]) => <div key={k} className="flex justify-between gap-4 px-4 py-3 text-[14.5px]"><dt className="text-muted">{k}</dt><dd className="text-right font-semibold">{v}</dd></div>)}
+      </dl>
+      <div className="flex gap-3 rounded-panel border-2 border-dashed border-line p-4 text-[14px] leading-snug">
+        <IconShield className="mt-0.5 h-6 w-6 shrink-0 text-ok" />
+        <p>Every box carries its own signed Torii code. Scan it in <Link href="/verify" className="font-bold underline underline-offset-2">Verify</Link> to confirm it's genuine and add it to your shelf. A copied code shows who registered it first.</p>
       </div>
       {related.length > 0 && (
         <section>
-          <h2 className="mb-2 font-bold">More from {s.title}</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <h2 className="h-section mb-3">More from {s.title}</h2>
+          <div className="grid grid-cols-2 gap-3">
             {related.map((r) => (
-              <Link key={r.id} href={`/figures/${r.slug}`} className="card overflow-hidden">
-                <FigureArt color={r.color} />
-                <div className="p-2 text-xs"><div className="line-clamp-2 font-semibold">{r.name}</div><div className="font-bold text-accent">{inr(r.price)}</div></div>
+              <Link key={r.id} href={`/figures/${r.slug}`} className="group">
+                <div className="overflow-hidden rounded-panel border-2 border-ink dark:border-line"><FigureArt color={r.color} name={r.name} image={r.image} rounded={false} className="transition-transform duration-300 group-hover:scale-105" /></div>
+                <div className="mt-2 line-clamp-2 text-[13.5px] font-bold leading-tight">{r.name}</div>
+                <div className="price text-[15px]">{inr(r.price)}</div>
               </Link>
             ))}
           </div>

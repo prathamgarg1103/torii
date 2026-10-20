@@ -3,7 +3,7 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Too
 
 type K = { reads: number; unlocks: number; unlockRev: number; prints: number; printRev: number; figures: number; figureRev: number; revenue: number };
 const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
-const C1 = "#c8282b", C2 = "#2d48b2", C3 = "#b87816";
+const C1 = "#e60033", C2 = "#2643e9", C3 = "#d98e04";
 
 export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topCities, opportunities, scope }: {
   kpis: K; bySeries: { name: string; reads: number; sales: number }[]; byLang: { name: string; reads: number; paid: number }[];
@@ -11,11 +11,11 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
   opportunities: { series: string; lang: string; states: string[]; reads: number }[]; scope: string;
 }) {
   const tiles = [
-    ["Chapter reads", kpis.reads.toLocaleString("en-IN"), "free + paid"],
+    ["Chapters read", kpis.reads.toLocaleString("en-IN"), "free and paid"],
     ["Paid unlocks", kpis.unlocks.toLocaleString("en-IN"), inr(kpis.unlockRev)],
     ["Print orders", kpis.prints.toLocaleString("en-IN"), inr(kpis.printRev)],
     ["Figure orders", kpis.figures.toLocaleString("en-IN"), inr(kpis.figureRev)],
-    ["Revenue", inr(kpis.revenue), scope],
+    ["Revenue to publishers", inr(kpis.revenue), scope],
   ];
   const funnel = [
     { step: "Read a chapter", n: kpis.reads },
@@ -25,7 +25,7 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
   const tip = { contentStyle: { background: "rgb(var(--card))", border: "1px solid rgb(var(--line))", borderRadius: 12, fontSize: 12, color: "rgb(var(--fg))" } };
   const axis = { stroke: "rgb(var(--muted))", fontSize: 11, tickLine: false, axisLine: false } as const;
   const Card = ({ title, children, sub }: { title: string; sub?: string; children: React.ReactNode }) => (
-    <div className="card p-4"><div className="font-bold">{title}</div>{sub && <div className="mb-2 text-xs text-muted">{sub}</div>}{children}</div>
+    <div className="card p-4"><div className="font-display text-[16px]">{title}</div>{sub && <div className="mb-2 mt-0.5 text-[12.5px] text-muted">{sub}</div>}{children}</div>
   );
   const sortedSeries = [...bySeries].sort((a, b) => b.reads - a.reads).slice(0, 10);
   const salesSeries = [...bySeries].sort((a, b) => b.sales - a.sales).slice(0, 10);
@@ -33,7 +33,7 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
-        {tiles.map(([l, v, s]) => <div key={l} className="card p-3"><div className="label">{l}</div><div className="text-xl font-extrabold">{v}</div><div className="text-xs text-muted">{s}</div></div>)}
+        {tiles.map(([l, v, s], k) => <div key={l} className={k === 4 ? "panel paper-band p-3.5" : "card p-3.5"}><div className="label">{l}</div><div className="price mt-1 text-[24px] leading-none">{v}</div><div className="mt-1 text-[12px] text-muted">{s}</div></div>)}
       </div>
 
       {opportunities.length > 0 && (
@@ -41,8 +41,8 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
           <div className="divide-y divide-line">
             {opportunities.map((o) => (
               <div key={o.series + o.lang} className="flex items-center gap-3 py-2 text-sm">
-                <span className="rounded-full bg-accentsoft px-2 py-0.5 text-xs font-bold text-accent">{o.lang}</span>
-                <span className="flex-1"><b>{o.series}</b> · {o.states.join(", ")}</span>
+                <span className="rounded-md border-2 border-ink bg-card px-2 py-0.5 text-[12px] font-bold dark:border-line">{o.lang}</span>
+                <span className="flex-1"><b>{o.series}</b> <span className="text-muted">in {o.states.join(" and ")}</span></span>
                 <span className="text-muted">{o.reads} reads</span>
               </div>
             ))}
