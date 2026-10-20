@@ -9,9 +9,9 @@ import { CHAPTER_PRICE, FREE_CHAPTERS_IN_PAID_MODE } from "@/lib/config";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Read" };
 
-export default function ReadHome() {
-  const db = read();
-  const user = currentUser();
+export default async function ReadHome() {
+  const db = await read();
+  const user = await currentUser();
   const items = db.series.map((s) => ({
     slug: s.slug, title: s.title, author: s.author, publisher: publisherName(db, s.publisherId), genres: s.genres,
     status: s.status, languages: s.languages, popularity: s.popularity, chapters: s.totalChapters, color: s.color, startYear: s.startYear,

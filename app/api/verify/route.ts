@@ -13,11 +13,11 @@ export type VerifyResult =
 export async function POST(req: Request) {
   const { code: raw } = await body<{ code: string }>(req);
   const code = normalizeCode(String(raw || ""));
-  const db0 = read();
+  const db0 = await read();
   const tag = signatureValid(code) ? db0.tags.find((t) => t.code === code) : undefined;
   if (!tag) return ok({ state: "invalid", code } satisfies VerifyResult);
 
-  const user = currentUser();
+  const user = await currentUser();
   const fig = tag.kind === "figure" ? db0.figures.find((f) => f.id === tag.refId) : undefined;
   const vol = tag.kind === "volume" ? db0.volumes.find((v) => v.id === tag.refId) : undefined;
   const series = db0.series.find((s) => s.id === (fig?.seriesId ?? vol?.seriesId));
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   if (!user) return ok({ state: "genuine", ...base, registered: false, mine: false, needsLogin: true } satisfies VerifyResult);
 
   // First scan by a signed-in user: register ownership and add it to their shelf.
-  mutate((db) => {
+  await mutate((db) => {
     const t = db.tags.find((x) => x.code === code)!;
     const lastOrder = [...db.orders].reverse().find((o) => o.userId === user.id);
     t.ownerId = user.id; t.registeredAt = now(); t.registeredCity = lastOrder?.city || "India";

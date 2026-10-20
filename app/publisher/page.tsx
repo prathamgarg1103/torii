@@ -11,9 +11,9 @@ export const metadata = { title: "Publisher dashboard" };
 
 const LOCAL: Record<string, Lang> = { "Tamil Nadu": "ta", Telangana: "te", "Andhra Pradesh": "te", "West Bengal": "bn", Assam: "bn" };
 
-export default function Publisher({ searchParams }: { searchParams: { pub?: string } }) {
-  requireAdmin();
-  const db = read();
+export default async function Publisher({ searchParams }: { searchParams: { pub?: string } }) {
+  await requireAdmin();
+  const db = await read();
   const pub = searchParams.pub || "";
   const seriesIds = new Set(db.series.filter((s) => !pub || s.publisherId === pub).map((s) => s.id));
   const ev = db.events.filter((e) => seriesIds.has(e.seriesId));

@@ -8,17 +8,17 @@ type Line = { kind: ItemKind; refId: string; qty?: number };
 
 // POST: add one or more items. PATCH: set quantity (0 removes).
 export async function POST(req: Request) {
-  const user = currentUser();
+  const user = await currentUser();
   if (!user) return fail("Please sign in", 401);
   const b = await body<{ items?: Line[] } & Line>(req);
   const items: Line[] = b.items ?? [{ kind: b.kind, refId: b.refId, qty: b.qty }];
-  const db0 = read();
+  const db0 = await read();
   for (const it of items) {
     const info = itemInfo(db0, it.kind, it.refId);
     if (!info) return fail("Item not found", 404);
     if (!info.available) return fail(`${info.title} is out of stock`);
   }
-  const count = mutate((db) => {
+  const count = await mutate((db) => {
     for (const it of items) {
       const ex = db.cart.find((c) => c.userId === user.id && c.kind === it.kind && c.refId === it.refId);
       if (ex) ex.qty = Math.min(10, ex.qty + (it.qty ?? 1));
@@ -30,10 +30,10 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const user = currentUser();
+  const user = await currentUser();
   if (!user) return fail("Please sign in", 401);
   const { id: lineId, qty } = await body<{ id: string; qty: number }>(req);
-  mutate((db) => {
+  await mutate((db) => {
     const l = db.cart.find((c) => c.id === lineId && c.userId === user.id);
     if (!l) return;
     if (qty <= 0) db.cart = db.cart.filter((c) => c !== l);

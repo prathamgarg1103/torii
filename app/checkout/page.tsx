@@ -7,9 +7,9 @@ import CheckoutForm from "@/components/CheckoutForm";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Checkout" };
 
-export default function Checkout() {
-  const user = requireUser("/checkout");
-  const db = read();
+export default async function Checkout() {
+  const user = await requireUser("/checkout");
+  const db = await read();
   const { lines, total } = cartFor(db, user.id);
   if (!lines.length) redirect("/cart");
   const last = [...db.orders].reverse().find((o) => o.userId === user.id);

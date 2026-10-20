@@ -19,6 +19,11 @@ export default function AdminControls({ mode, slugs, overrides }: { mode: "free"
     setMsg(r.ok ? `${j.title} ch. ${j.number}: ${j.freeOverride === null ? "follows reading mode" : j.freeOverride ? "always free" : "always paid"}` : j.error);
     router.refresh();
   }
+  async function reset() {
+    if (!window.confirm("Reset all demo accounts, carts, orders and unlocks to the starting state?")) return;
+    await fetch("/api/admin/reset", { method: "POST" });
+    location.href = "/login?next=/publisher";
+  }
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <div className="card p-4">
@@ -30,6 +35,7 @@ export default function AdminControls({ mode, slugs, overrides }: { mode: "free"
             </button>
           ))}
         </div>
+        <button className="mt-3 text-xs text-muted underline" onClick={reset}>Reset demo data</button>
         <p className="mt-2 text-xs text-muted">{mode === "free" ? "Every chapter is free. Use this to build the audience at launch." : "First 3 chapters of each series stay free; the rest are ₹9. Unlocked chapters stay unlocked."}</p>
       </div>
       <div className="card p-4">

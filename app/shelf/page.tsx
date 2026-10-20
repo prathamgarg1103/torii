@@ -16,9 +16,9 @@ function rangeText(owned: number[]) {
   return `${sorted.length} volumes`;
 }
 
-export default function Shelf() {
-  const user = requireUser("/shelf");
-  const db = read();
+export default async function Shelf() {
+  const user = await requireUser("/shelf");
+  const db = await read();
   const progress = db.progress.filter((p) => p.userId === user.id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const unlocks = db.unlocks.filter((u) => u.userId === user.id);
   const ownedVolIds = new Set(db.ownership.filter((o) => o.userId === user.id && o.kind === "volume").map((o) => o.refId));

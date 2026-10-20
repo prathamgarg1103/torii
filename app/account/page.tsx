@@ -9,9 +9,9 @@ import { inr } from "@/lib/format";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Account" };
 
-export default function Account({ searchParams }: { searchParams: { denied?: string } }) {
-  const user = requireUser("/account");
-  const db = read();
+export default async function Account({ searchParams }: { searchParams: { denied?: string } }) {
+  const user = await requireUser("/account");
+  const db = await read();
   const orders = db.orders.filter((o) => o.userId === user.id).length;
   const unlocks = db.unlocks.filter((u) => u.userId === user.id).length;
   return (

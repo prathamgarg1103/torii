@@ -1,5 +1,4 @@
 import "server-only";
-import { read } from "./db";
 import { FREE_CHAPTERS_IN_PAID_MODE } from "./config";
 import type { Chapter, DB, Figure, ItemKind, Series, User } from "./types";
 
@@ -15,7 +14,6 @@ export function canRead(db: DB, ch: Chapter, user: User | null): boolean {
   return db.unlocks.some((u) => u.userId === user.id && u.chapterId === ch.id);
 }
 
-export const seriesBySlug = (slug: string) => read().series.find((s) => s.slug === slug);
 export const publisherName = (db: DB, id: string) => db.publishers.find((p) => p.id === id)?.name ?? "";
 
 export function itemInfo(db: DB, kind: ItemKind, refId: string):

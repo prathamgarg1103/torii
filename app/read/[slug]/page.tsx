@@ -9,16 +9,16 @@ import { LANGS, type Lang } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const s = read().series.find((x) => x.slug === params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const s = (await read()).series.find((x) => x.slug === params.slug);
   return { title: s ? `Read ${s.title}` : "Not found" };
 }
 
-export default function SeriesRead({ params, searchParams }: { params: { slug: string }; searchParams: { lang?: string } }) {
-  const db = read();
+export default async function SeriesRead({ params, searchParams }: { params: { slug: string }; searchParams: { lang?: string } }) {
+  const db = await read();
   const s = db.series.find((x) => x.slug === params.slug);
   if (!s) notFound();
-  const user = currentUser();
+  const user = await currentUser();
   const prog = user ? db.progress.find((p) => p.userId === user.id && p.seriesId === s.id) : undefined;
   const lang: Lang = (s.languages.includes(searchParams.lang as Lang) ? searchParams.lang : prog?.language && s.languages.includes(prog.language) ? prog.language : "en") as Lang;
   const chs = db.chapters.filter((c) => c.seriesId === s.id).sort((a, b) => a.number - b.number);

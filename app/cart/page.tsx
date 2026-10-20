@@ -8,9 +8,9 @@ import { inr } from "@/lib/format";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Cart" };
 
-export default function Cart() {
-  const user = requireUser("/cart");
-  const { lines, total, count } = cartFor(read(), user.id);
+export default async function Cart() {
+  const user = await requireUser("/cart");
+  const { lines, total, count } = cartFor((await read()), user.id);
   if (!lines.length) return (
     <div className="space-y-3 pt-10 text-center">
       <h1 className="h-title">Your cart is empty</h1>

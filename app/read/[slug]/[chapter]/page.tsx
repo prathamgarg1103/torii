@@ -8,18 +8,18 @@ import { LANGS, type Lang } from "@/lib/types";
 import { CHAPTER_PRICE } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
-export function generateMetadata({ params }: { params: { slug: string; chapter: string } }) {
-  const s = read().series.find((x) => x.slug === params.slug);
+export async function generateMetadata({ params }: { params: { slug: string; chapter: string } }) {
+  const s = (await read()).series.find((x) => x.slug === params.slug);
   return { title: s ? `${s.title} · Ch. ${params.chapter}` : "Not found" };
 }
 
-export default function ChapterPage({ params, searchParams }: { params: { slug: string; chapter: string }; searchParams: { lang?: string } }) {
-  const db = read();
+export default async function ChapterPage({ params, searchParams }: { params: { slug: string; chapter: string }; searchParams: { lang?: string } }) {
+  const db = await read();
   const s = db.series.find((x) => x.slug === params.slug);
   const n = parseInt(params.chapter, 10);
   const ch = s && db.chapters.find((c) => c.seriesId === s.id && c.number === n);
   if (!s || !ch) notFound();
-  const user = currentUser();
+  const user = await currentUser();
   const lang: Lang = s.languages.includes(searchParams.lang as Lang) ? (searchParams.lang as Lang) : "en";
   const langs = LANGS.filter((l) => s.languages.includes(l.code)).map((l) => ({ code: l.code, native: l.native }));
   const next = db.chapters.find((c) => c.seriesId === s.id && c.number === n + 1);

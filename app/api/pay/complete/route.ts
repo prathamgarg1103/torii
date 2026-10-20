@@ -4,7 +4,7 @@ import { body, fail, ok } from "@/lib/api";
 import { PayError, fulfil, razorpayEnabled, razorpayVerify, type Purpose } from "@/lib/payments";
 
 export async function POST(req: Request) {
-  const user = currentUser();
+  const user = await currentUser();
   if (!user) return fail("Please sign in", 401);
   const { purpose, payload, payment } = await body<{ purpose: Purpose; payload: Record<string, unknown>; payment: Record<string, string> }>(req);
   let ref = "";
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     ref = String(payment?.ref || "MOCK");
   }
   try {
-    return ok(mutate((db) => fulfil(db, user, purpose, payload || {}, ref)));
+    return ok(await mutate((db) => fulfil(db, user, purpose, payload || {}, ref)));
   } catch (e) {
     return fail(e instanceof PayError ? e.message : "Payment could not be completed");
   }

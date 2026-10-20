@@ -4,9 +4,9 @@ import { requireUser } from "@/lib/auth";
 import { fmtDate, inr } from "@/lib/format";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Orders" };
-export default function Orders() {
-  const user = requireUser("/orders");
-  const orders = read().orders.filter((o) => o.userId === user.id).reverse();
+export default async function Orders() {
+  const user = await requireUser("/orders");
+  const orders = (await read()).orders.filter((o) => o.userId === user.id).reverse();
   return (
     <div className="space-y-3">
       <h1 className="h-title">Your orders</h1>

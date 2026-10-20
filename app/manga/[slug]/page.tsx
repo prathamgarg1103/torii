@@ -9,16 +9,16 @@ import VolumeGrid from "@/components/VolumeGrid";
 import { inr } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const s = read().series.find((x) => x.slug === params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const s = (await read()).series.find((x) => x.slug === params.slug);
   return { title: s ? `${s.title} volumes` : "Not found" };
 }
 
-export default function SeriesShop({ params }: { params: { slug: string } }) {
-  const db = read();
+export default async function SeriesShop({ params }: { params: { slug: string } }) {
+  const db = await read();
   const s = db.series.find((x) => x.slug === params.slug);
   if (!s) notFound();
-  const user = currentUser();
+  const user = await currentUser();
   const owned = user ? ownedVolumes(db, user.id, s.id) : new Set<number>();
   const inCart = new Set(user ? db.cart.filter((c) => c.userId === user.id && c.kind === "volume").map((c) => c.refId) : []);
   const vols = db.volumes.filter((v) => v.seriesId === s.id).sort((a, b) => a.number - b.number);

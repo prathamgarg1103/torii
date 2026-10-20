@@ -3,8 +3,8 @@ import FigureCatalog from "@/components/FigureCatalog";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Action figures" };
 
-export default function FiguresHome() {
-  const db = read();
+export default async function FiguresHome() {
+  const db = await read();
   const items = db.figures.map((f) => {
     const s = db.series.find((x) => x.id === f.seriesId)!;
     return { slug: f.slug, name: f.name, series: s.title, character: f.character, manufacturer: f.manufacturer.replace(/ \(.+\)/, ""), price: f.price,

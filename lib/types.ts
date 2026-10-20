@@ -46,3 +46,12 @@ export interface DB {
   users: User[]; unlocks: Unlock[]; progress: Progress[]; cart: CartItem[]; orders: Order[]; tags: AuthTag[];
   ownership: Ownership[]; settings: { readingMode: "free" | "paid" }; events: Event[];
 }
+
+export interface Catalog {
+  publishers: Publisher[]; series: Series[]; chapters: Chapter[]; volumes: Volume[]; boxSets: BoxSet[]; figures: Figure[]; events: Event[];
+}
+export interface State {
+  users: User[]; unlocks: Unlock[]; progress: Progress[]; cart: CartItem[]; orders: Order[]; tags: AuthTag[]; ownership: Ownership[];
+  settings: { readingMode: "free" | "paid" }; events: Event[];
+  chapterOverrides: Record<string, boolean>; stock: Record<string, number>; editionSold: Record<string, number>;
+}

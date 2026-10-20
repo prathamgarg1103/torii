@@ -83,7 +83,7 @@ Each code is `T1-<serial>-<signature>`, where the signature is an HMAC-SHA256 of
 
 - Next.js 14 (App Router), TypeScript, Tailwind CSS
 - PWA: manifest, icons, service worker with offline reading of opened chapters
-- Data: a small file-backed store (`lib/db.ts` → `data/db.json`) with zero setup. Every read and write goes through `read()` / `mutate()`, so it can be swapped for Postgres/Prisma for production.
+- Data: the catalogue is static and bundled from `data/catalog.json`. Everything that changes (accounts, carts, orders, unlocks, tags, settings, stock) is a small state document, stored in **Upstash Redis** when its env vars are set, or in `data/state.json` otherwise. Every read and write goes through `read()` / `mutate()` in `lib/db.ts`, so it can be swapped for Postgres in production.
 - Razorpay (test mode) with a mock fallback, `html5-qrcode` for camera scanning, `qrcode` for tag images, Recharts for the dashboard
 
 ### Project layout
@@ -97,7 +97,18 @@ scripts/seed.ts   catalogue, demo users, demo tags and 1,800 analytics events
 
 ## Deploying
 
-The file-based store needs a server with a persistent disk, such as Render, Railway, Fly.io or any VPS: `npm install && npm run seed && npm run build && npm start`. Serverless hosts like Vercel don't keep files between requests, so for those, swap `lib/db.ts` for a hosted database first. Camera scanning needs HTTPS, which all of these hosts provide.
+### Vercel (recommended)
+1. Push this folder to GitHub, then on vercel.com click **Add New → Project** and import the repo. The framework is detected as Next.js automatically.
+2. Before (or right after) the first deploy, open the project → **Storage** → **Create / Connect** → **Upstash for Redis** (free plan) and connect it to the project. This adds `KV_REST_API_URL` and `KV_REST_API_TOKEN`.
+3. Under **Settings → Environment Variables**, add `AUTH_SECRET` (any long random string). Optionally add `TAG_SECRET`: if you change it from the default, the demo codes in this README stop matching.
+4. **Redeploy**, so the app picks up the Redis variables.
+
+Without Redis, Vercel can show the catalogue but can't save sign-ins, carts or orders, because serverless functions can't keep files. To wipe demo data on Vercel, use **Reset demo data** in the publisher dashboard's Reading mode card, or delete the `torii:state:v1` key in the Upstash console.
+
+### Render / Railway / any VPS
+These work without Redis, using the file store. On Render: **New → Blueprint** → pick the repo (`render.yaml` is included, free plan). The file store resets when a free instance restarts.
+
+Camera scanning needs HTTPS, which all of these hosts provide.
 
 ## What's simulated
 

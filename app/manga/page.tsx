@@ -8,9 +8,9 @@ import { inr } from "@/lib/format";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Buy manga" };
 
-export default function MangaHome({ searchParams }: { searchParams: { pub?: string; q?: string } }) {
-  const db = read();
-  const user = currentUser();
+export default async function MangaHome({ searchParams }: { searchParams: { pub?: string; q?: string } }) {
+  const db = await read();
+  const user = await currentUser();
   const q = (searchParams.q || "").toLowerCase();
   const list = db.series
     .filter((s) => (!searchParams.pub || s.publisherId === searchParams.pub) && (!q || s.title.toLowerCase().includes(q) || s.author.toLowerCase().includes(q)))

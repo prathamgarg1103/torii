@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   if (!/^[6-9]\d{9}$/.test(p)) return fail("Enter a valid 10-digit Indian mobile number");
   if (otp === undefined) return ok({ sent: true });
   if (otp !== "123456") return fail("Incorrect OTP. (Prototype: use 123456)");
-  const user = mutate((db) => {
+  const user = await mutate((db) => {
     let u = db.users.find((x) => x.phone === p);
     if (!u) { u = { id: id("u_"), phone: p, name: name?.trim() || null, wallet: 0, isAdmin: false, createdAt: now() }; db.users.push(u); }
     return u;

@@ -18,20 +18,20 @@ export function setSession(userId: string) {
 export function clearSession() {
   cookies().delete(COOKIE);
 }
-export function currentUser(): User | null {
+export async function currentUser(): Promise<User | null> {
   const raw = cookies().get(COOKIE)?.value;
   if (!raw) return null;
   const [uid, s] = raw.split(".");
   if (!uid || !s || sig(uid) !== s) return null;
-  return read().users.find((u) => u.id === uid) ?? null;
+  return (await read()).users.find((u) => u.id === uid) ?? null;
 }
-export function requireUser(next = "/"): User {
-  const u = currentUser();
+export async function requireUser(next = "/"): Promise<User> {
+  const u = await currentUser();
   if (!u) redirect(`/login?next=${encodeURIComponent(next)}`);
   return u;
 }
-export function requireAdmin(): User {
-  const u = requireUser("/publisher");
+export async function requireAdmin(): Promise<User> {
+  const u = await requireUser("/publisher");
   if (!u.isAdmin) redirect("/account?denied=1");
   return u;
 }

@@ -8,17 +8,17 @@ import { IconShield } from "@/components/Icons";
 import { inr } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const f = read().figures.find((x) => x.slug === params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const f = (await read()).figures.find((x) => x.slug === params.slug);
   return { title: f?.name ?? "Not found" };
 }
 
-export default function FigurePage({ params }: { params: { slug: string } }) {
-  const db = read();
+export default async function FigurePage({ params }: { params: { slug: string } }) {
+  const db = await read();
   const f = db.figures.find((x) => x.slug === params.slug);
   if (!f) notFound();
   const s = db.series.find((x) => x.id === f.seriesId)!;
-  const user = currentUser();
+  const user = await currentUser();
   const left = f.editionSize ? f.editionSize - f.editionSold : null;
   const soldOut = left === 0 || f.stock === 0;
   const owned = user ? db.ownership.some((o) => o.userId === user.id && o.kind === "figure" && o.refId === f.id) : false;

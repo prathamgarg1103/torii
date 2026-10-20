@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import type { DB, Series, Chapter, Volume, BoxSet, Figure, Event, Lang, AuthTag, User } from "../lib/types";
+import type { Catalog, State, Series, Chapter, Volume, BoxSet, Figure, Event, Lang, AuthTag, User } from "../lib/types";
 
 // Load .env so tag signatures match the running app.
 const envFile = path.join(process.cwd(), ".env");
@@ -184,14 +184,18 @@ for (let i = 0; i < 1800; i++) {
   events.push({ id: "e" + i, type, seriesId: s.id, language: lang, state, city: pick(cities), amount, createdAt: t(rand() * 90) });
 }
 
-const db: DB = {
-  publishers, series, chapters, volumes, boxSets, figures, users, unlocks: [], progress: [], cart: [], orders: [], tags,
+const catalog: Catalog = { publishers, series, chapters, volumes, boxSets, figures, events };
+const state: State = {
+  users, unlocks: [], progress: [], cart: [], orders: [], tags,
   ownership: [{ userId: "u_riya", kind: "figure", refId: luffy.id, source: "verify", createdAt: t(220) }],
-  settings: { readingMode: "free" }, events,
+  settings: { readingMode: "free" }, events: [], chapterOverrides: {}, stock: {}, editionSold: {},
 };
-const out = path.join(process.cwd(), "data", "db.json");
-fs.mkdirSync(path.dirname(out), { recursive: true });
-fs.writeFileSync(out, JSON.stringify(db));
+const dir = path.join(process.cwd(), "data");
+fs.mkdirSync(dir, { recursive: true });
+fs.writeFileSync(path.join(dir, "catalog.json"), JSON.stringify(catalog));
+fs.writeFileSync(path.join(dir, "initial-state.json"), JSON.stringify(state, null, 1));
+// Reset local file-mode state. (On Redis, use "Reset demo data" in the publisher dashboard.)
+for (const f of ["state.json", "db.json"]) { try { fs.unlinkSync(path.join(dir, f)); } catch {} }
 console.log(`Seeded ${series.length} series, ${chapters.length} chapters, ${volumes.length} volumes, ${figures.length} figures, ${events.length} analytics events.`);
 console.log("Demo verification codes:");
 console.log("  Genuine (figure):          ", tags[0].code);

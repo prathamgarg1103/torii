@@ -1,0 +1,80 @@
+{
+ "users": [
+  {
+   "id": "u_admin",
+   "phone": "9999999999",
+   "name": "Publisher Admin",
+   "wallet": 0,
+   "isAdmin": true,
+   "createdAt": "2026-06-22T08:08:17.879Z"
+  },
+  {
+   "id": "u_aarav",
+   "phone": "9876543210",
+   "name": "Aarav",
+   "wallet": 50,
+   "isAdmin": false,
+   "createdAt": "2026-09-10T08:08:17.879Z"
+  },
+  {
+   "id": "u_riya",
+   "phone": "9123456780",
+   "name": "Riya",
+   "wallet": 0,
+   "isAdmin": false,
+   "createdAt": "2026-04-03T08:08:17.879Z"
+  }
+ ],
+ "unlocks": [],
+ "progress": [],
+ "cart": [],
+ "orders": [],
+ "tags": [
+  {
+   "code": "T1-GENUINE1-2JFXZC9E",
+   "kind": "figure",
+   "refId": "f_satoru-gojo-pop-up-parade",
+   "title": "Satoru Gojo — Pop Up Parade",
+   "editionNo": null,
+   "ownerId": null,
+   "registeredAt": null,
+   "registeredCity": null
+  },
+  {
+   "code": "T1-GENUINE2-83SMHLXT",
+   "kind": "volume",
+   "refId": "v_jujutsu-kaisen_1",
+   "title": "Jujutsu Kaisen Vol. 1",
+   "editionNo": null,
+   "ownerId": null,
+   "registeredAt": null,
+   "registeredCity": null
+  },
+  {
+   "code": "T1-CLAIMED1-EBFEJQK8",
+   "kind": "figure",
+   "refId": "f_monkey-d-luffy-gear-5",
+   "title": "Monkey D. Luffy — Gear 5",
+   "editionNo": null,
+   "ownerId": "u_riya",
+   "registeredAt": "2026-03-12T05:50:00.000Z",
+   "registeredCity": "Lucknow"
+  }
+ ],
+ "ownership": [
+  {
+   "userId": "u_riya",
+   "kind": "figure",
+   "refId": "f_monkey-d-luffy-gear-5",
+   "source": "verify",
+   "createdAt": "2026-03-14T08:08:17.897Z"
+  }
+ ],
+ "settings": {
+  "readingMode": "free"
+ },
+ "events": [],
+ "chapterOverrides": {},
+ "stock": {},
+ "editionSold": {}
+}

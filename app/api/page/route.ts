@@ -7,11 +7,11 @@ import { LANGS } from "@/lib/types";
 export async function GET(req: Request) {
   const u = new URL(req.url);
   const slug = u.searchParams.get("s") || "", c = Number(u.searchParams.get("c")), p = Number(u.searchParams.get("p")), l = u.searchParams.get("l") || "en";
-  const db = read();
+  const db = await read();
   const s = db.series.find((x) => x.slug === slug);
   const ch = s && db.chapters.find((x) => x.seriesId === s.id && x.number === c);
   if (!s || !ch || !(p >= 1 && p <= ch.pages)) return new Response("Not found", { status: 404 });
-  if (!canRead(db, ch, currentUser())) return new Response("Locked", { status: 403 });
+  if (!canRead(db, ch, (await currentUser()))) return new Response("Locked", { status: 403 });
   const lang = LANGS.find((x) => x.code === l) ?? LANGS[0];
   const seed = (c * 31 + p * 7) % 4;
   const layouts = [

@@ -9,8 +9,8 @@ export const metadata = { title: "Demo tags" };
 const FAKE = "T1-FAKE7777-ABCDEFGH";
 
 export default async function Tags() {
-  requireAdmin();
-  const db = read();
+  await requireAdmin();
+  const db = await read();
   const h = headers();
   const origin = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
   const demo = [

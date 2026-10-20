@@ -15,9 +15,9 @@ export const metadata: Metadata = {
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#c8282b" };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const user = currentUser();
-  const cartCount = user ? read().cart.filter((c) => c.userId === user.id).reduce((s, c) => s + c.qty, 0) : 0;
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const user = await currentUser();
+  const cartCount = user ? (await read()).cart.filter((c) => c.userId === user.id).reduce((s, c) => s + c.qty, 0) : 0;
   return (
     <html lang="en">
       <body className="min-h-screen font-sans antialiased">

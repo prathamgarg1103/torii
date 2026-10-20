@@ -11,8 +11,8 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Order" };
 
 export default async function OrderPage({ params, searchParams }: { params: { id: string }; searchParams: { new?: string } }) {
-  const user = requireUser(`/orders/${params.id}`);
-  const db = read();
+  const user = await requireUser(`/orders/${params.id}`);
+  const db = await read();
   const o = db.orders.find((x) => x.id === params.id && x.userId === user.id);
   if (!o) notFound();
   const h = headers();
