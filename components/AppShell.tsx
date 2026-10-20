@@ -81,7 +81,7 @@ export default function AppShell({ children, signedIn, cartCount, wallet, credit
         </div>
       </header>
       <main className="px-4 pb-32 pt-5"><div key={path} className="animate-page-in">{children}</div>
-        {credit && <p className="mt-10 text-center text-[11.5px] leading-relaxed text-muted">Covers, banners and synopses from <a href="https://anilist.co" className="underline underline-offset-2">AniList</a>. Artwork © its publishers. Shown for demonstration only.</p>}
+        {credit && <p className="mt-10 text-center text-[11.5px] leading-relaxed text-muted">Covers, banners, synopses and character art from <a href="https://anilist.co" className="underline underline-offset-2">AniList</a>; trailers play from YouTube. Artwork © its publishers and studios. Shown for demonstration only.</p>}
       </main>
       {(
         <nav className="app-fixed bottom-0 z-30 px-3" style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }} aria-label="Sections">

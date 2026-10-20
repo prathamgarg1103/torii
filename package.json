@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/prebuild.mjs",
     "dev": "next dev -p 3000",
+    "prebuild": "node scripts/prebuild.mjs",
     "build": "next build",
     "start": "next start -p ${PORT:-3000}",
     "seed": "tsx scripts/seed.ts",

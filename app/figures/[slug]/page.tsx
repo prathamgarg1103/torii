@@ -33,7 +33,7 @@ export default async function FigurePage({ params }: { params: { slug: string } 
 
   return (
     <div className="space-y-6">
-      <Gallery color={f.color} name={f.name} />
+      <Gallery color={f.color} name={f.name} image={f.image} character={f.character} />
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-ok/30 bg-ok/10 px-2.5 py-1 text-[12.5px] font-bold text-ok"><IconShield className="h-4 w-4" />Official, licensed</span>
@@ -68,7 +68,7 @@ export default async function FigurePage({ params }: { params: { slug: string } 
           <div data-reveal="stagger" className="grid grid-cols-2 gap-3">
             {related.map((r) => (
               <Link key={r.id} href={`/figures/${r.slug}`} className="group">
-                <div className="overflow-hidden rounded-panel border border-line dark:border-line"><FigureArt color={r.color} name={r.name} image={r.image} rounded={false} className="transition-transform duration-700 ease-out group-hover:scale-105" /></div>
+                <div className="overflow-hidden rounded-panel border border-line dark:border-line"><FigureArt color={r.color} name={r.name} image={r.image} character={r.character} rounded={false} className="transition-transform duration-700 ease-out group-hover:scale-105" /></div>
                 <div className="mt-2 line-clamp-2 text-[13.5px] font-bold leading-tight">{r.name}</div>
                 <div className="price text-[15px]">{inr(r.price)}</div>
               </Link>

@@ -44,7 +44,7 @@ export default function FigureCatalog({ items }: { items: F[] }) {
         {list.map((f) => (
           <Link key={f.slug} href={`/figures/${f.slug}`} className="group">
             <div className="relative overflow-hidden rounded-panel border border-line dark:border-line">
-              <FigureArt color={f.color} name={f.name} image={f.image} rounded={false} className="transition-transform duration-300 group-hover:scale-[1.04] duration-700 ease-out" />
+              <FigureArt color={f.color} name={f.name} image={f.image} character={f.character} rounded={false} className="transition-transform duration-300 group-hover:scale-[1.04] duration-700 ease-out" />
               {f.availability !== "in_stock" && <span className="absolute left-2 top-2 rounded-md border border-line bg-card px-1.5 py-0.5 text-[11.5px] font-black dark:border-line">{f.availability === "limited" ? `${f.left} of a numbered run left` : `Pre-order, ${f.releaseMonth}`}</span>}
             </div>
             <div className="mt-2 line-clamp-2 text-[14px] font-bold leading-tight">{f.name}</div>

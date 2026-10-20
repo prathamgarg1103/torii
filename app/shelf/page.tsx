@@ -130,7 +130,7 @@ export default async function Shelf() {
               const tag = db.tags.find((t) => t.ownerId === user.id && t.refId === f.id);
               return (
                 <Link key={f.id} href={`/figures/${f.slug}`} data-section="figures" className="group">
-                  <div className="overflow-hidden rounded-panel border border-line dark:border-line"><FigureArt color={f.color} name={f.name} image={f.image} rounded={false} /></div>
+                  <div className="overflow-hidden rounded-panel border border-line dark:border-line"><FigureArt color={f.color} name={f.name} image={f.image} character={f.character} rounded={false} /></div>
                   <div className="mt-1.5 line-clamp-2 text-[12.5px] font-bold leading-tight">{f.name}</div>
                   <div className="text-[12px] font-semibold text-ok">{tag ? "Verified" : o.source === "order" ? "On its way" : "Owned"}{tag?.editionNo ? `, #${String(tag.editionNo).padStart(4, "0")}` : ""}</div>
                 </Link>

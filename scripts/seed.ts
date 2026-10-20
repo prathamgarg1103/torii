@@ -85,12 +85,14 @@ const seriesSeed: SeedSeries[] = [
 const builtin: Series[] = seriesSeed.map((s) => ({ id: "s_" + s.slug, ...s }));
 let series: Series[] = builtin;
 let meta: Catalog["meta"] = { source: "builtin", fetchedAt: null, count: builtin.length };
+let characterArt: Record<string, string> = {};
 // `--fixture` uses a synthetic 430-title sample for testing layouts without network access.
 const aniFile = process.argv.includes("--fixture")
   ? path.join(process.cwd(), "scripts", "fixtures", "anilist-sample.json")
   : path.join(process.cwd(), "data", "anilist.json");
 if (fs.existsSync(aniFile) && !process.argv.includes("--builtin")) {
-  const raw = JSON.parse(fs.readFileSync(aniFile, "utf8")) as { fetchedAt: string; target?: number; items: AniItem[] };
+  const raw = JSON.parse(fs.readFileSync(aniFile, "utf8")) as { fetchedAt: string; target?: number; items: AniItem[]; characters?: Record<string, string> };
+  characterArt = raw.characters ?? {};
   series = fromAniList(raw.items, builtin, raw.target ?? 400);
   meta = { source: process.argv.includes("--fixture") ? "builtin" : "anilist", fetchedAt: raw.fetchedAt, count: series.length };
 }
@@ -125,13 +127,16 @@ const figSeed: FS[] = [
   ["Conan Edogawa — Nendoroid", "detective-conan", "Conan Edogawa", "Good Smile Company", "Shogakukan · TMS", 3699, "Non-scale", 10, "PVC, ABS", "in_stock", null, null],
   ["Edward Elric — S.H.Figuarts", "fullmetal-alchemist", "Edward Elric", "Bandai Spirits (S.H.Figuarts)", "Square Enix · Bones", 5999, "Non-scale", 13, "PVC, ABS", "in_stock", null, null],
 ];
+// AniList spells a few names differently from the shop listings.
+const CHARACTER_ALIAS: Record<string, string> = { "Kyojuro Rengoku": "Kyoujurou Rengoku", "Levi Ackerman": "Levi", "Manjiro Sano": "Manjirou Sano" };
 const palette = ["#d9452b", "#3b3f8f", "#2f7d6d", "#c2762b", "#e08a1e", "#c94f7c", "#2f8f4e", "#6b4f3a", "#2563a8", "#5f8fb0", "#a8342f", "#4a3a6b"];
 const figures: Figure[] = figSeed.map((f, i) => {
   const [name, slug, character, manufacturer, licensor, price, scale, heightCm, material, availability, editionSize, releaseMonth] = f;
   const fslug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   return { id: "f_" + fslug, slug: fslug, name, seriesId: "s_" + slug, character, manufacturer, licensor, price, scale, heightCm, material,
     availability, editionSize, editionSold: editionSize ? Math.floor(editionSize * (0.3 + rand() * 0.4)) : 0, releaseMonth,
-    color: series.find((s) => s.id === "s_" + slug)!.color || palette[i % palette.length], stock: availability === "preorder" ? 999 : 5 + Math.floor(rand() * 60) };
+    color: series.find((s) => s.id === "s_" + slug)!.color || palette[i % palette.length], stock: availability === "preorder" ? 999 : 5 + Math.floor(rand() * 60),
+    image: characterArt[CHARACTER_ALIAS[character] ?? character] };
 });
 
 const t = (daysAgo: number) => new Date(Date.now() - daysAgo * 864e5).toISOString();

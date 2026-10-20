@@ -22,7 +22,7 @@ export default async function FiguresHome() {
             <h1 className="font-display text-[clamp(30px,9cqw,48px)] leading-[0.98]">Real figures. Proven real.</h1>
             <p className="mt-3 text-[15px] leading-snug">Licensed from the studios, from ₹649 minis to numbered 1/7 scale pieces. Scan any box to check it.</p>
           </div>
-          <div className="overflow-hidden rounded-panel border border-line shadow-panel dark:border-line dark:shadow-none"><FigureArt color={hero.color} name={hero.name} image={hero.image} rounded={false} /></div>
+          <div className="overflow-hidden rounded-panel border border-line shadow-panel dark:border-line dark:shadow-none"><FigureArt color={hero.color} name={hero.name} image={hero.image} character={hero.character} rounded={false} /></div>
         </div>
       </section>
       <FigureCatalog items={items} />

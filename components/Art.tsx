@@ -1,4 +1,5 @@
 import CoverImg from "./CoverImg";
+import { AutoCover, AutoFigure } from "./AutoArt";
 /* Original generated artwork: manga-panel book jackets and studio renders of an abstract
    figure. No copyrighted covers, characters or product photos. If a publisher supplies
    official art, pass `image` and it is used instead. */
@@ -50,7 +51,8 @@ export function Cover({ title, color, sub, vol, size = "md", dim = false, image,
   const fx = 40 + r() * 120, fy = 150 + r() * 90;
 
   return (
-    <div className={wrapCls}>
+    <div className={`${wrapCls} [container-type:inline-size]`}>
+      <AutoCover title={title} color={color} eager={size === "lg"}>
       <svg viewBox="0 0 200 300" className="block h-full w-full" role="img" aria-label={`${title}${vol ? ` volume ${vol}` : ""} cover`}>
         <defs>
           <pattern id={`${pid}d`} width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.5" fill={INK} opacity=".55" /></pattern>
@@ -107,14 +109,16 @@ export function Cover({ title, color, sub, vol, size = "md", dim = false, image,
           </g>
         )}
       </svg>
+      </AutoCover>
     </div>
   );
 }
 
 /** Studio render of an abstract posable figure (never a specific character). */
-export function FigureArt({ color, name = "", variant = 0, className = "", rounded = true, image }: { color: string; name?: string; variant?: 0 | 1 | 2; className?: string; rounded?: boolean; image?: string }) {
+export function FigureArt({ color, name = "", variant = 0, className = "", rounded = true, image, character }: { color: string; name?: string; variant?: 0 | 1 | 2; className?: string; rounded?: boolean; image?: string; character?: string }) {
   // eslint-disable-next-line @next/next/no-img-element
-  if (image && variant === 0) return <img src={image} alt={name} loading="lazy" className={`block aspect-square w-full object-cover ${rounded ? "rounded-[10px]" : ""} ${className}`} />;
+  if (image && variant === 0) return <img src={image} alt={name} loading="lazy" referrerPolicy="no-referrer" className={`block aspect-square w-full object-cover object-top ${rounded ? "rounded-[10px]" : ""} ${className}`} />;
+  if (character && variant === 0) return <AutoFigure character={character} name={name} className={className} rounded={rounded}><FigureArt color={color} name={name} className={className} rounded={rounded} /></AutoFigure>;
   const seed = hash(name + variant);
   const r = rng(seed);
   const id = `f${seed.toString(36)}`;

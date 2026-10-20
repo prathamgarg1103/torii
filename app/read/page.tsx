@@ -35,7 +35,7 @@ export default async function ReadHome() {
   const featured = [...trending].sort((a, b) => Number(!!b.banner) - Number(!!a.banner)).slice(0, 5);
   const hero = featured.map((s) => ({
     slug: s.slug, title: s.title, author: s.author, publisher: pub(s.publisherId), color: s.color, synopsis: s.synopsis,
-    langs: LANGS.filter((l) => s.languages.includes(l.code)).map((l) => l.native), chapters: s.totalChapters, image: s.image, banner: s.banner,
+    langs: LANGS.filter((l) => s.languages.includes(l.code)).map((l) => l.native), chapters: s.totalChapters, image: s.image, banner: s.banner, trailer: s.trailer,
     genres: s.genres.slice(0, 3),
   }));
   const rows = ROWS.map((r) => ({ r, items: rowItems(db.series, r) })).filter((x) => x.items.length >= 5);

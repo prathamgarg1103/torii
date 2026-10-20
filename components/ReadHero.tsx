@@ -5,9 +5,11 @@ import { useGSAP } from "@gsap/react";
 import { EASE, EASE_IN, gsap, reduced, SplitText } from "@/lib/motion";
 import { Cover } from "./Art";
 import BannerImg from "./BannerImg";
+import { useMangaArt } from "./AutoArt";
+import { PlayIcon, TrailerBackdrop, TrailerModal } from "./Trailer";
 
 gsap.registerPlugin(useGSAP);
-type Item = { slug: string; title: string; author: string; publisher: string; color: string; synopsis: string; langs: string[]; chapters: number; image?: string; banner?: string; genres: string[] };
+type Item = { slug: string; title: string; author: string; publisher: string; color: string; synopsis: string; langs: string[]; chapters: number; image?: string; banner?: string; trailer?: string; genres: string[] };
 
 export default function ReadHero({ items, priceNote }: { items: Item[]; priceNote: string }) {
   const [i, setI] = useState(0);
@@ -15,6 +17,10 @@ export default function ReadHero({ items, priceNote }: { items: Item[]; priceNot
   const busy = useRef(false);
   const touch = useRef(0);
   const it = items[i];
+  const art = useMangaArt(it.title, !it.banner || !it.trailer);
+  const banner = it.banner || art?.banner;
+  const trailer = it.trailer || art?.trailer;
+  const [watching, setWatching] = useState(false);
 
   const intro = (dir = 0) => {
     const q = gsap.utils.selector(root);
@@ -54,7 +60,8 @@ export default function ReadHero({ items, priceNote }: { items: Item[]; priceNot
       onTouchStart={(e) => (touch.current = e.touches[0].clientX)}
       onTouchEnd={(e) => { const dx = e.changedTouches[0].clientX - touch.current; if (Math.abs(dx) > 50) go(i + (dx < 0 ? 1 : -1)); }}>
       <div className="tone pointer-events-none absolute -inset-y-16 inset-x-0 opacity-70" />
-      {it.banner && <BannerImg key={it.banner} src={it.banner} className="h-[62%]" fade="linear-gradient(to bottom, rgb(var(--paper)/.1) 0%, rgb(var(--paper)/.55) 35%, rgb(var(--paper)) 62%)" />}
+      {banner && <BannerImg key={banner} src={banner} className="h-[62%]" fade="linear-gradient(to bottom, rgb(var(--paper)/.1) 0%, rgb(var(--paper)/.55) 35%, rgb(var(--paper)) 62%)" />}
+      {trailer && !watching && <TrailerBackdrop key={trailer} id={trailer} className="h-[58%]" fade="linear-gradient(to bottom, rgb(var(--paper)/0) 0%, rgb(var(--paper)/.15) 45%, rgb(var(--paper)/.85) 82%, rgb(var(--paper)) 100%)" />}
       <div className="relative grid grid-cols-[41%_1fr] items-end gap-5 pt-14">
         <div data-jacket-wrap>
           <div>
@@ -71,7 +78,9 @@ export default function ReadHero({ items, priceNote }: { items: Item[]; priceNot
           <p data-fade className="mt-2.5 line-clamp-3 max-w-[38ch] text-[14.5px] leading-snug">{it.synopsis}</p>
           <div data-fade className="mt-5 flex flex-wrap items-center gap-2">
             <Link href={`/read/${it.slug}/1`} className="btn-primary">Read chapter 1</Link>
-            <Link href={`/read/${it.slug}`} className="btn-ghost">Details</Link>
+            {trailer
+              ? <button type="button" onClick={() => setWatching(true)} className="btn-ghost gap-1.5"><PlayIcon />Trailer</button>
+              : <Link href={`/read/${it.slug}`} className="btn-ghost">Details</Link>}
           </div>
         </div>
       </div>
@@ -85,6 +94,7 @@ export default function ReadHero({ items, priceNote }: { items: Item[]; priceNot
           ))}
         </div>
       </div>
+      {watching && trailer && <TrailerModal id={trailer} title={it.title} onClose={() => setWatching(false)} />}
     </section>
   );
 }

@@ -24,6 +24,8 @@ export interface Series {
   image?: string;
   /** Wide banner art URL for the billboard. */
   banner?: string;
+  /** YouTube video id of the anime adaptation's trailer. */
+  trailer?: string;
 }
 export interface Chapter {
   id: string; seriesId: string; number: number; volumeNumber: number; title: string; pages: number;

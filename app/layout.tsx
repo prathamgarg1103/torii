@@ -8,7 +8,7 @@ import NavProgress from "@/components/NavProgress";
 import DesktopAside from "@/components/DesktopAside";
 import { Suspense } from "react";
 import { currentUser } from "@/lib/auth";
-import { catalogMeta, read } from "@/lib/db";
+import { read } from "@/lib/db";
 import { APP_NAME, APP_TAGLINE } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body className="min-h-screen font-sans antialiased">
-        <AppShell signedIn={!!user} cartCount={cartCount} wallet={user?.wallet ?? 0} credit={catalogMeta().source === "anilist"}>{children}</AppShell>
+        <AppShell signedIn={!!user} cartCount={cartCount} wallet={user?.wallet ?? 0} credit>{children}</AppShell>
         <DesktopAside />
         <SWRegister />
         <Suspense fallback={null}><NavProgress /></Suspense>

@@ -7,7 +7,8 @@ import { canRead, isChapterFree, publisherName } from "@/lib/catalog";
 import { chaptersOf } from "@/lib/derive";
 import { Cover } from "@/components/Art";
 import ChapterList from "@/components/ChapterList";
-import BannerImg from "@/components/BannerImg";
+import { AutoBanner } from "@/components/AutoArt";
+import { TrailerCard } from "@/components/Trailer";
 import { LANGS, type Lang } from "@/lib/types";
 import { CHAPTER_PRICE } from "@/lib/config";
 
@@ -34,7 +35,7 @@ export default async function SeriesRead({ params, searchParams }: { params: { s
     <div className="space-y-7">
       <section className={`paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 ${s.banner ? "pt-24" : "pt-6"}`}>
         <div className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
-        {s.banner && <BannerImg src={s.banner} className="h-48" fade="linear-gradient(to bottom, rgb(var(--paper)/.2) 0%, rgb(var(--paper)/.7) 30%, rgb(var(--paper)) 48%)" />}
+        <AutoBanner src={s.banner} title={s.title} className="h-48" fade="linear-gradient(to bottom, rgb(var(--paper)/.2) 0%, rgb(var(--paper)/.7) 30%, rgb(var(--paper)) 48%)" />
         <div className="relative flex gap-5">
           <div data-parallax="28" className="w-[38%] max-w-[170px] shrink-0"><Cover title={s.title} color={s.color} image={s.image} sub={pub} size="lg" /></div>
           <div className="min-w-0 self-end">
@@ -70,6 +71,8 @@ export default async function SeriesRead({ params, searchParams }: { params: { s
           <div key={l} className="card py-3"><div data-count={/\d/.test(n) ? "" : undefined} className="price text-[22px] leading-none">{n}</div><div className="mt-1 text-[12px] text-muted">{l}</div></div>
         ))}
       </div>
+
+      <TrailerCard title={s.title} trailer={s.trailer} />
 
       <ChapterList slug={s.slug} lang={lang} rows={rows} readUpTo={prog?.chapter ?? 0} totalVolumes={s.totalVolumes} />
       <RevealScope />

@@ -8,7 +8,18 @@ export type AniItem = {
   coverImage: { extraLarge: string | null; large: string | null; color: string | null } | null; bannerImage: string | null;
   averageScore: number | null; popularity: number | null;
   staff: { edges: { role: string; node: { name: { full: string } } }[] } | null;
+  relations?: { edges: { relationType: string; node: { type: string; format: string | null; popularity: number | null; trailer: { id: string; site: string } | null; bannerImage: string | null } | null }[] } | null;
 };
+
+/** The anime adaptation with the most viewers, which supplies a YouTube trailer and, if the manga has none, a banner. */
+function adaptation(it: AniItem) {
+  const anime = (it.relations?.edges ?? [])
+    .filter((e) => e.node?.type === "ANIME" && (e.relationType === "ADAPTATION" || e.relationType === "ALTERNATIVE" || e.relationType === "SPIN_OFF"))
+    .map((e) => e.node!)
+    .sort((a, b) => Number(b.format === "TV") - Number(a.format === "TV") || (b.popularity ?? 0) - (a.popularity ?? 0));
+  const withTrailer = anime.find((a) => a.trailer?.site === "youtube" && /^[\w-]{6,20}$/.test(a.trailer.id));
+  return { trailer: withTrailer?.trailer?.id, banner: anime.find((a) => a.bannerImage)?.bannerImage ?? undefined };
+}
 
 export const PUBLISHERS = [
   { id: "shueisha", name: "Shueisha" }, { id: "kodansha", name: "Kodansha" }, { id: "shogakukan", name: "Shogakukan" },
@@ -130,7 +141,8 @@ export function fromAniList(items: AniItem[], builtin: Series[], limit = 400): S
       demographic: demo,
       score: it.averageScore ?? undefined,
       image: it.coverImage?.extraLarge || it.coverImage?.large || undefined,
-      banner: it.bannerImage || undefined,
+      banner: it.bannerImage || adaptation(it).banner,
+      trailer: adaptation(it).trailer,
     });
   });
 

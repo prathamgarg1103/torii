@@ -14,27 +14,31 @@ All three share one account (phone + OTP), one cart, one UPI wallet, **My Shelf*
 
 Torii is built as a phone app. Every screen uses one phone-width column. On a computer the app sits in that column, with a panel beside it inviting people to open it on their phone, plus a QR code.
 
-## Add the top 400 manga (real covers)
+## The top 400 manga, with covers and trailers
 
-Out of the box the catalogue has 14 hand-built series. To load the 400 most popular Japanese manga from [AniList](https://anilist.co), run this once, on a computer with internet access:
+Out of the box the repo holds 14 hand-built series. The 400 most popular Japanese manga come from [AniList](https://anilist.co), and **this happens automatically**: `npm run dev` and `npm run build` (so every Vercel deploy) check for `data/anilist.json`, and if it's missing they import the top 400 first. It takes about a minute, once.
+
+The import fetches:
+- titles, authors, genres, demographics (Shonen, Seinen, Shojo, Josei), status, chapter and volume counts, synopses
+- cover art and banner art (falling back to the anime's banner when the manga has none)
+- the **YouTube trailer** of each title's anime adaptation
+- **character art** for the figures shop
+
+It filters out adult titles and keeps the 14 original series under their existing links, so figures and demo codes still work. If AniList can't be reached, the build carries on with the current catalogue instead of failing.
+
+To refresh the data by hand, or to save it in the repo so deploys don't fetch it again:
 
 ```bash
 npm run import
-```
-
-It takes about 30 seconds and does three things:
-- Fetches titles, authors, genres, demographics (Shonen, Seinen, Shojo, Josei), status, chapter and volume counts, synopses, cover art and banner art.
-- Filters out adult titles.
-- Keeps the 14 original series under their existing links, so figures and demo codes still work.
-
-Then commit the result, so deploys don't need network access. The catalogue is bundled into the app when it builds.
-
-```bash
 git add data/anilist.json data/catalog.json && git commit -m "Import top 400 manga" && git push
 ```
 
+**No empty cards.** Any card the catalogue has no artwork for (for example the 14 built-in series before the import has run) looks itself up on AniList in the viewer's browser: covers, banners, trailers and figure character art. Lookups are batched, rate-limited and cached on the device for a week. Until the art arrives, or if it can't be found, the generated jacket stays.
+
+**Trailers:** the Read billboard plays the current title's trailer muted behind the banner, like a streaming app, with a sound toggle and a Trailer button for the full player. Series pages have a "Watch the anime trailer" card. Videos play from youtube-nocookie.com. Autoplay is skipped with reduced motion or data saver on, and a trailer that won't embed is never shown.
+
 How the imported data is used:
-- **Images** stay on AniList's servers and load in the viewer's browser. If one can't load, a typographic jacket is shown instead.
+- **Images and videos** stay on AniList's servers and YouTube and load in the viewer's browser. If an image can't load, the generated jacket is shown instead.
 - **Credit:** the app shows "Covers, banners and synopses from AniList. Artwork © its publishers. Shown for demonstration only."
 - **Publishers:** AniList doesn't list publishers, so well-known series are mapped to Shueisha, Kodansha, Shogakukan, Square Enix, Kadokawa, Hakusensha or Akita Shoten. Everything else shows as "Other publishers".
 - **Missing counts:** where AniList has no chapter or volume count (common for ongoing series), the count is estimated.
