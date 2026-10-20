@@ -1,0 +1,19 @@
+# One-click deploy on Render (free plan): Dashboard → New → Blueprint → pick this repo.
+services:
+  - type: web
+    name: torii
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run seed && npm run build
+    startCommand: npm start
+    healthCheckPath: /read
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: AUTH_SECRET
+        generateValue: true
+      # Kept fixed so the demo verification codes in the README keep working.
+      - key: TAG_SECRET
+        value: dev-tag-secret-change-me

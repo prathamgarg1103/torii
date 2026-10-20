@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 250 247 241; --card: 255 255 255; --fg: 27 26 23; --muted: 110 106 98; --line: 230 224 212;
+  --accent: 200 40 43; --accentsoft: 251 233 230; --ok: 46 125 91; --warn: 181 120 22; --bad: 190 38 38;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: 18 17 16; --card: 30 28 26; --fg: 240 236 228; --muted: 160 154 144; --line: 52 49 45; --accentsoft: 60 30 28; color-scheme: dark; }
+}
+[data-section="read"] { --accent: 200 40 43; --accentsoft: 251 233 230; }
+[data-section="manga"] { --accent: 45 72 178; --accentsoft: 230 235 252; }
+[data-section="figures"] { --accent: 186 120 22; --accentsoft: 250 240 220; }
+[data-section="shelf"] { --accent: 46 125 91; --accentsoft: 225 242 233; }
+[data-section="account"] { --accent: 200 40 43; --accentsoft: 251 233 230; }
+@media (prefers-color-scheme: dark) {
+  [data-section="read"] { --accent: 232 84 76; --accentsoft: 64 28 26; }
+  [data-section="manga"] { --accent: 110 140 240; --accentsoft: 28 34 66; }
+  [data-section="figures"] { --accent: 228 165 60; --accentsoft: 60 44 18; }
+  [data-section="shelf"] { --accent: 80 180 130; --accentsoft: 22 50 38; }
+  [data-section="account"] { --accent: 232 84 76; --accentsoft: 64 28 26; }
+}
+
+html, body { background: rgb(var(--bg)); color: rgb(var(--fg)); }
+body { -webkit-tap-highlight-color: transparent; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition active:scale-[.98] disabled:opacity-50 disabled:pointer-events-none; }
+  .btn-primary { @apply btn bg-accent text-white; }
+  .btn-ghost { @apply btn border border-line bg-card text-fg; }
+  .card { @apply rounded-2xl border border-line bg-card; }
+  .chip { @apply inline-flex items-center rounded-full border border-line bg-card px-3 py-1.5 text-xs font-medium whitespace-nowrap; }
+  .chip-on { @apply chip border-accent bg-accentsoft text-accent; }
+  .input { @apply w-full rounded-xl border border-line bg-card px-3.5 py-2.5 text-sm outline-none focus:border-accent; }
+  .h-title { @apply text-xl font-extrabold tracking-tight; }
+  .label { @apply text-[11px] font-bold uppercase tracking-wider text-muted; }
+}
