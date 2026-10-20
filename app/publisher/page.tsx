@@ -79,7 +79,7 @@ export default async function Publisher({ searchParams }: { searchParams: { pub?
         </div>
       </div>
       <AdminControls mode={db.settings.readingMode} slugs={db.series.map((s) => ({ slug: s.slug, title: s.title }))}
-        overrides={db.chapters.filter((c) => c.freeOverride !== null).slice(0, 20).map((c) => ({ title: db.series.find((s) => s.id === c.seriesId)!.title, slug: db.series.find((s) => s.id === c.seriesId)!.slug, number: c.number, free: c.freeOverride! }))} />
+        overrides={Object.entries(db.chapterOverrides).slice(0, 20).map(([id, free]) => { const m = id.match(/^c_(.+)_(\d+)$/)!; const se = db.series.find((x) => x.slug === m[1]); return { title: se?.title ?? m[1], slug: m[1], number: Number(m[2]), free }; })} />
       <Dashboard kpis={kpis} bySeries={bySeries} byLang={byLang} byState={byState} trend={trend} topCities={topCities} opportunities={opportunities}
         scope={pub ? publisherName(db, pub) : "All publishers"} />
       <div className="flex flex-wrap gap-2 text-sm">

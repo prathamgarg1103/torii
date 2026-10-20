@@ -12,8 +12,18 @@ export interface Series {
   id: string; slug: string; title: string; author: string; publisherId: string;
   genres: string[]; status: "ongoing" | "completed"; synopsis: string; color: string;
   languages: Lang[]; popularity: number; totalChapters: number; totalVolumes: number; startYear: number;
-  /** Optional official cover art supplied by the publisher (URL). Falls back to generated art. */
+  /** Chapters per printed volume, used to work out which volume a chapter belongs to. */
+  cpv: number;
+  /** Price of an India-printed volume, in rupees. */
+  volPrice: number;
+  /** Shonen, Seinen, Shojo or Josei, when known. */
+  demographic?: string;
+  /** Average rating out of 100, when known. */
+  score?: number;
+  /** Cover art URL (from the publisher, or AniList in this prototype). Falls back to generated art. */
   image?: string;
+  /** Wide banner art URL for the billboard. */
+  banner?: string;
 }
 export interface Chapter {
   id: string; seriesId: string; number: number; volumeNumber: number; title: string; pages: number;
@@ -45,14 +55,20 @@ export interface AuthTag {
 export interface Ownership { userId: string; kind: "volume" | "figure"; refId: string; source: "order" | "verify"; createdAt: string; }
 export interface Event { id: string; type: "read" | "unlock" | "print" | "figure"; seriesId: string; language: Lang; state: string; city: string; amount: number; createdAt: string; }
 
+/** Chapters, volumes and box sets are not stored: they are derived from each series (see lib/derive.ts). */
 export interface DB {
-  publishers: Publisher[]; series: Series[]; chapters: Chapter[]; volumes: Volume[]; boxSets: BoxSet[]; figures: Figure[];
+  publishers: Publisher[]; series: Series[]; figures: Figure[];
   users: User[]; unlocks: Unlock[]; progress: Progress[]; cart: CartItem[]; orders: Order[]; tags: AuthTag[];
   ownership: Ownership[]; settings: { readingMode: "free" | "paid" }; events: Event[];
+  /** Per-chapter free/paid overrides, keyed by chapter id. */
+  chapterOverrides: Record<string, boolean>;
+  /** Volume stock that has changed from its starting level, keyed by volume id. */
+  stock: Record<string, number>;
 }
 
 export interface Catalog {
-  publishers: Publisher[]; series: Series[]; chapters: Chapter[]; volumes: Volume[]; boxSets: BoxSet[]; figures: Figure[]; events: Event[];
+  meta: { source: "anilist" | "builtin"; fetchedAt: string | null; count: number };
+  publishers: Publisher[]; series: Series[]; figures: Figure[]; events: Event[];
 }
 export interface State {
   users: User[]; unlocks: Unlock[]; progress: Progress[]; cart: CartItem[]; orders: Order[]; tags: AuthTag[]; ownership: Ownership[];

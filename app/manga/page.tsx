@@ -3,28 +3,31 @@ import RevealScope from "@/components/RevealScope";
 import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { ownedVolumes, publisherName } from "@/lib/catalog";
+import { boxSetsOf } from "@/lib/derive";
 import { Cover } from "@/components/Art";
 import { inr } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Manga" };
 
-export default async function MangaHome({ searchParams }: { searchParams: { pub?: string; q?: string } }) {
+export default async function MangaHome({ searchParams }: { searchParams: { pub?: string; q?: string; show?: string } }) {
   const db = await read();
   const user = await currentUser();
   const q = (searchParams.q || "").toLowerCase();
   const list = db.series
     .filter((s) => (!searchParams.pub || s.publisherId === searchParams.pub) && (!q || s.title.toLowerCase().includes(q) || s.author.toLowerCase().includes(q)))
     .sort((a, b) => b.popularity - a.popularity);
-  const boxes = db.boxSets.filter((b) => b.title.includes("Complete"));
+  const boxes = db.series.filter((s) => s.status === "completed").sort((a, b) => b.popularity - a.popularity).slice(0, 10).flatMap((s) => boxSetsOf(s).filter((b) => b.id.endsWith("_all")));
   const filtered = !!(searchParams.pub || q);
+  const show = Math.max(30, Number(searchParams.show) || 30);
+  const qs = (n: number) => `/manga?${new URLSearchParams({ ...(searchParams.pub ? { pub: searchParams.pub } : {}), ...(searchParams.q ? { q: searchParams.q } : {}), show: String(n) })}`;
 
   return (
     <div className="space-y-8">
       <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 pt-7 dark:border-line">
-        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
+        <div className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative">
-          <h1 className="font-display text-[clamp(30px,9vw,48px)] leading-[0.98]">Every volume,<br />in order.</h1>
+          <h1 className="font-display text-[clamp(30px,9cqw,48px)] leading-[0.98]">Every volume,<br />in order.</h1>
           <p className="mt-3 max-w-[34ch] text-[15px] leading-snug">Printed in India from ₹299. Every copy carries a code you can scan to prove it's real.</p>
           <form className="mt-5 flex gap-2" action="/manga">
             <input name="q" defaultValue={searchParams.q} className="input" placeholder="Find a series or author" aria-label="Search" />
@@ -67,9 +70,8 @@ export default async function MangaHome({ searchParams }: { searchParams: { pub?
       <section aria-labelledby="series" className="space-y-3">
         <h2 id="series" data-reveal="lines" className="h-section">{filtered ? `${list.length} series found` : "Shop by series"}</h2>
         <div data-reveal="stagger" className="space-y-3">
-        {list.map((s) => {
-          const vols = db.volumes.filter((v) => v.seriesId === s.id);
-          const minP = Math.min(...vols.map((v) => v.price));
+        {list.slice(0, show).map((s) => {
+          const minP = s.volPrice;
           const owned = user ? ownedVolumes(db, user.id, s.id).size : 0;
           return (
             <Link key={s.id} href={`/manga/${s.slug}`} className="group card flex items-center gap-4 p-3 hover:border-fg/25 hover:shadow-panel-sm">
@@ -89,6 +91,7 @@ export default async function MangaHome({ searchParams }: { searchParams: { pub?
           );
         })}
         </div>
+        {list.length > show && <Link href={qs(show + 30)} scroll={false} className="btn-ghost w-full">Show {Math.min(30, list.length - show)} more of {list.length}</Link>}
         {!list.length && <div className="panel p-6 text-center"><p className="font-bold">No series match “{searchParams.q}”.</p><Link href="/manga" className="btn-ghost mt-3">Show all series</Link></div>}
       </section>
       <RevealScope />

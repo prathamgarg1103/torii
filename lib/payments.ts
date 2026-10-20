@@ -2,6 +2,7 @@ import "server-only";
 import crypto from "node:crypto";
 import { id, now } from "./db";
 import { cartFor, itemInfo } from "./catalog";
+import { boxById, chapterById, volumeById } from "./derive";
 import { pincodeInfo } from "./geo";
 import { mintCode } from "./tags";
 import { CHAPTER_PRICE } from "./config";
@@ -16,7 +17,7 @@ export class PayError extends Error {}
 /** Server-side price calculation: the client never decides what it pays. */
 export function quote(db: DB, user: User, purpose: Purpose, p: Payload): { amount: number; description: string } {
   if (purpose === "unlock") {
-    const ch = db.chapters.find((c) => c.id === p.chapterId);
+    const ch = chapterById(db, String(p.chapterId));
     if (!ch) throw new PayError("Chapter not found");
     if (db.unlocks.some((u) => u.userId === user.id && u.chapterId === ch.id)) throw new PayError("Already unlocked");
     const s = db.series.find((x) => x.id === ch.seriesId)!;
@@ -55,7 +56,7 @@ export function fulfil(db: DB, user: User, purpose: Purpose, p: Payload, payment
     const editionNos: number[] = []; const tagCodes: string[] = [];
     const fig = l.kind === "figure" ? db.figures.find((f) => f.id === l.refId) : undefined;
     const volIds = l.kind === "volume" ? [l.refId] : l.kind === "box"
-      ? (() => { const b = db.boxSets.find((x) => x.id === l.refId)!; return db.volumes.filter((v) => v.seriesId === b.seriesId && v.number >= b.fromVol && v.number <= b.toVol).map((v) => v.id); })()
+      ? (() => { const b = boxById(db, l.refId)!; const s = db.series.find((x) => x.id === b.seriesId)!; return Array.from({ length: b.toVol - b.fromVol + 1 }, (_, k) => `v_${s.slug}_${b.fromVol + k}`); })()
       : [];
     for (let q = 0; q < l.qty; q++) {
       if (fig) {
@@ -67,7 +68,7 @@ export function fulfil(db: DB, user: User, purpose: Purpose, p: Payload, payment
         addOwnership(db, u.id, "figure", fig.id, "order");
       }
       for (const vid of volIds) {
-        const v = db.volumes.find((x) => x.id === vid)!; v.stock = Math.max(0, v.stock - 1);
+        const v = volumeById(db, vid)!; db.stock[v.id] = Math.max(0, v.stock - 1);
         const s = db.series.find((x) => x.id === v.seriesId)!;
         const code = mintCode(); tagCodes.push(code);
         db.tags.push({ code, kind: "volume", refId: v.id, title: `${s.title} Vol. ${v.number}`, editionNo: null, ownerId: null, registeredAt: null, registeredCity: null });
@@ -86,7 +87,7 @@ export function fulfil(db: DB, user: User, purpose: Purpose, p: Payload, payment
 }
 
 export function unlockChapter(db: DB, u: User, chapterId: string, via: "wallet" | "upi") {
-  const ch = db.chapters.find((c) => c.id === chapterId);
+  const ch = chapterById(db, chapterId);
   if (!ch) throw new PayError("Chapter not found");
   if (db.unlocks.some((x) => x.userId === u.id && x.chapterId === ch.id)) return { ok: true, already: true };
   if (via === "wallet") {

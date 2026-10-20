@@ -1,6 +1,7 @@
 import "server-only";
 import { FREE_CHAPTERS_IN_PAID_MODE } from "./config";
 import type { Chapter, DB, Figure, ItemKind, Series, User } from "./types";
+import { boxById, volumeById } from "./derive";
 
 export function isChapterFree(db: DB, ch: Chapter): boolean {
   if (ch.freeOverride !== null) return ch.freeOverride;
@@ -20,13 +21,13 @@ export function itemInfo(db: DB, kind: ItemKind, refId: string):
   | { title: string; subtitle: string; price: number; color: string; href: string; series?: Series; figure?: Figure; available: boolean }
   | null {
   if (kind === "volume") {
-    const v = db.volumes.find((x) => x.id === refId); if (!v) return null;
+    const v = volumeById(db, refId); if (!v) return null;
     const s = db.series.find((x) => x.id === v.seriesId)!;
     return { title: `${s.title} Vol. ${v.number}`, subtitle: v.edition === "india" ? "India-printed edition" : "Imported edition",
       price: v.price, color: s.color, href: `/manga/${s.slug}`, series: s, available: v.stock > 0 };
   }
   if (kind === "box") {
-    const b = db.boxSets.find((x) => x.id === refId); if (!b) return null;
+    const b = boxById(db, refId); if (!b) return null;
     const s = db.series.find((x) => x.id === b.seriesId)!;
     return { title: b.title, subtitle: `Volumes ${b.fromVol}–${b.toVol} · box set`, price: b.price, color: s.color, href: `/manga/${s.slug}`, series: s, available: true };
   }
@@ -43,6 +44,7 @@ export function cartFor(db: DB, userId: string) {
 }
 
 export function ownedVolumes(db: DB, userId: string, seriesId: string): Set<number> {
-  const ids = new Set(db.ownership.filter((o) => o.userId === userId && o.kind === "volume").map((o) => o.refId));
-  return new Set(db.volumes.filter((v) => v.seriesId === seriesId && ids.has(v.id)).map((v) => v.number));
+  const s = db.series.find((x) => x.id === seriesId); if (!s) return new Set();
+  const prefix = `v_${s.slug}_`;
+  return new Set(db.ownership.filter((o) => o.userId === userId && o.kind === "volume" && o.refId.startsWith(prefix)).map((o) => Number(o.refId.slice(prefix.length))));
 }

@@ -16,10 +16,10 @@ export default async function FiguresHome() {
   return (
     <div className="space-y-6">
       <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 pt-7 dark:border-line">
-        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
+        <div className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative grid grid-cols-[1fr_42%] items-center gap-4">
           <div>
-            <h1 className="font-display text-[clamp(30px,9vw,48px)] leading-[0.98]">Real figures. Proven real.</h1>
+            <h1 className="font-display text-[clamp(30px,9cqw,48px)] leading-[0.98]">Real figures. Proven real.</h1>
             <p className="mt-3 text-[15px] leading-snug">Licensed from the studios, from ₹649 minis to numbered 1/7 scale pieces. Scan any box to check it.</p>
           </div>
           <div className="overflow-hidden rounded-panel border border-line shadow-panel dark:border-line dark:shadow-none"><FigureArt color={hero.color} name={hero.name} image={hero.image} rounded={false} /></div>

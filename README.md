@@ -10,6 +10,48 @@ Torii is a mobile-first web app (installable PWA) run by Japanese publishers. It
 
 All three share one account (phone + OTP), one cart, one UPI wallet, **My Shelf** (reading progress, volumes and figures owned, gaps highlighted) and **Verify** (scan the signed authenticity code on any product). The **publisher dashboard** at `/publisher` shows the Japanese publishers what India reads and buys, by series, language, state and city. It also holds the reading-mode switch.
 
+## Phone only
+
+Torii is built as a phone app. Every screen uses one phone-width column. On a computer the app sits in that column, with a panel beside it inviting people to open it on their phone, plus a QR code.
+
+## Add the top 400 manga (real covers)
+
+Out of the box the catalogue has 14 hand-built series. To load the 400 most popular Japanese manga from [AniList](https://anilist.co), run this once, on a computer with internet access:
+
+```bash
+npm run import
+```
+
+It takes about 30 seconds and does three things:
+- Fetches titles, authors, genres, demographics (Shonen, Seinen, Shojo, Josei), status, chapter and volume counts, synopses, cover art and banner art.
+- Filters out adult titles.
+- Keeps the 14 original series under their existing links, so figures and demo codes still work.
+
+Then commit the result, so deploys don't need network access. The catalogue is bundled into the app when it builds.
+
+```bash
+git add data/anilist.json data/catalog.json && git commit -m "Import top 400 manga" && git push
+```
+
+How the imported data is used:
+- **Images** stay on AniList's servers and load in the viewer's browser. If one can't load, a typographic jacket is shown instead.
+- **Credit:** the app shows "Covers, banners and synopses from AniList. Artwork © its publishers. Shown for demonstration only."
+- **Publishers:** AniList doesn't list publishers, so well-known series are mapped to Shueisha, Kodansha, Shogakukan, Square Enix, Kadokawa, Hakusensha or Akita Shoten. Everything else shows as "Other publishers".
+- **Missing counts:** where AniList has no chapter or volume count (common for ongoing series), the count is estimated.
+
+Chapters, volumes and box sets aren't stored. They're worked out from each series' counts (`lib/derive.ts`), so 400 series stay fast.
+
+To try the 400-series layout without internet, run `npm run seed -- --fixture`. It uses a synthetic sample with fake titles, for testing only.
+
+The **Read** home is laid out like Netflix:
+- a billboard with banner art
+- Continue reading
+- Top 10 in India
+- "Because you read …"
+- rows for Shonen, Seinen, Shojo and each genre, plus Read in Hindi or Tamil, Highest rated, Completed and New this decade
+
+Every row has a "See all" link to a filterable, paged browse page.
+
 ## Run it
 
 Requires Node.js 18.17 or newer.
@@ -85,10 +127,10 @@ The look borrows from Japanese manga weeklies, which are printed on coloured new
 
 - **Type:** Dela Gothic One (a Japanese-designed heavy display face) for headings and prices, Hanken Grotesk for everything else. Both are bundled through Fontsource, so nothing loads from Google at runtime.
 - **Artwork:** every cover is a generated manga-panel jacket (speed lines, screentone, halftone suns, ink gutters), and every figure is an abstract studio render. No copyrighted covers, characters or product photos are included.
-- **Motion (GSAP + ScrollTrigger + SplitText, Lenis, Tailwind):** one easing language throughout, long decelerating expo curves with no bounce or overshoot.
+- **Motion (GSAP + ScrollTrigger + SplitText, Tailwind):** one easing language throughout, long decelerating expo curves with no bounce or overshoot.
   - **On load:** the Read hero opens its jacket with a clip-path wipe while the headline rises letter by letter from behind a mask. Swiping or tapping the dots changes slides with a directional wipe, and the hero drifts slowly as you scroll away.
-  - **On scroll:** headings rise line by line, cover grids and lists cascade in, and stats count up. Desktop gets Lenis smooth scrolling; phones keep native scrolling.
-  - **On interaction:** covers tilt slightly toward the cursor with a soft sheen (desktop only), the nav highlight glides between sections, and the header frosts and tightens as you scroll. "Add to cart" draws its check mark while the cart icon pulses. Sheets glide up, the unlock lock lifts its shackle, and Verify draws its seal around the result.
+  - **On scroll:** headings rise line by line, cover grids and lists cascade in, and stats count up. Scrolling stays native, so it is fast.
+  - **On interaction:** the nav highlight glides between sections, and the header tightens as you scroll. "Add to cart" draws its check mark while the cart icon pulses. Sheets glide up, the unlock lock lifts its shackle, and Verify draws its seal around the result.
   - **Between screens:** every screen eases in, a hairline progress bar runs across the top while the next screen loads, and the Read section shows shimmer skeletons.
   - **Accessibility:** content waiting to scroll in stays focusable and clickable, and all motion switches off when the device asks for reduced motion.
 - Works in light and dark mode, with 44px+ tap targets and visible keyboard focus.
@@ -99,7 +141,7 @@ Each series and figure has an optional `image` field, typed in `lib/types.ts` an
 
 ## Tech
 
-- Next.js 14 (App Router), TypeScript, Tailwind CSS, GSAP (ScrollTrigger, SplitText, @gsap/react), Lenis, Fontsource fonts
+- Next.js 14 (App Router), TypeScript, Tailwind CSS, GSAP (ScrollTrigger, SplitText, @gsap/react), Fontsource fonts
 - PWA: manifest, icons, service worker with offline reading of opened chapters
 - Data: the catalogue is static and bundled from `data/catalog.json`. Everything that changes (accounts, carts, orders, unlocks, tags, settings, stock) is a small state document, stored in **Upstash Redis** when its env vars are set, or in `data/state.json` otherwise. Every read and write goes through `read()` / `mutate()` in `lib/db.ts`, so it can be swapped for Postgres in production.
 - Razorpay (test mode) with a mock fallback, `html5-qrcode` for camera scanning, `qrcode` for tag images, Recharts for the dashboard

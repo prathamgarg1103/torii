@@ -25,9 +25,9 @@ export default async function Account({ searchParams }: { searchParams: { denied
     <div className="space-y-6">
       {searchParams.denied && <p className="rounded-xl border border-bad/30 bg-bad/10 px-3 py-2.5 text-[14px] font-semibold text-bad">The publisher dashboard needs a publisher account.</p>}
       <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 pt-7 dark:border-line">
-        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
+        <div className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative">
-          <h1 className="font-display text-[clamp(28px,8vw,40px)] leading-none">{user.name || "Hello, reader"}</h1>
+          <h1 className="font-display text-[clamp(28px,8cqw,40px)] leading-none">{user.name || "Hello, reader"}</h1>
           <p className="mt-2 text-[14.5px] font-semibold">+91 {user.phone.replace(/(\d{5})(\d{5})/, "$1 $2")}{user.isAdmin ? ", publisher account" : ""}</p>
         </div>
       </section>

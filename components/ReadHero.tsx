@@ -4,10 +4,10 @@ import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { EASE, EASE_IN, gsap, reduced, SplitText } from "@/lib/motion";
 import { Cover } from "./Art";
-import Tilt from "./Tilt";
+import BannerImg from "./BannerImg";
 
 gsap.registerPlugin(useGSAP);
-type Item = { slug: string; title: string; author: string; publisher: string; color: string; synopsis: string; langs: string[]; chapters: number; image?: string };
+type Item = { slug: string; title: string; author: string; publisher: string; color: string; synopsis: string; langs: string[]; chapters: number; image?: string; banner?: string; genres: string[] };
 
 export default function ReadHero({ items, priceNote }: { items: Item[]; priceNote: string }) {
   const [i, setI] = useState(0);
@@ -34,8 +34,6 @@ export default function ReadHero({ items, priceNote }: { items: Item[]; priceNot
     intro();
     // Slow drift as the hero scrolls away.
     gsap.to("[data-jacket-wrap]", { yPercent: 14, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: 0.6 } });
-    gsap.to("[data-copy]", { yPercent: 6, autoAlpha: 0.4, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: 0.6 } });
-    gsap.to("[data-tone]", { yPercent: -18, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: 0.6 } });
   }, { scope: root });
 
   const go = (n: number) => {
@@ -55,20 +53,22 @@ export default function ReadHero({ items, priceNote }: { items: Item[]; priceNot
       className="paper-band bleed relative -mt-5 overflow-hidden px-4 pb-7 pt-7"
       onTouchStart={(e) => (touch.current = e.touches[0].clientX)}
       onTouchEnd={(e) => { const dx = e.changedTouches[0].clientX - touch.current; if (Math.abs(dx) > 50) go(i + (dx < 0 ? 1 : -1)); }}>
-      <div data-tone className="tone pointer-events-none absolute -inset-y-16 inset-x-0 opacity-70" />
-      <div className="relative grid grid-cols-[41%_1fr] items-center gap-5 sm:grid-cols-[230px_1fr] sm:gap-8">
+      <div className="tone pointer-events-none absolute -inset-y-16 inset-x-0 opacity-70" />
+      {it.banner && <BannerImg key={it.banner} src={it.banner} className="h-[62%]" fade="linear-gradient(to bottom, rgb(var(--paper)/.1) 0%, rgb(var(--paper)/.55) 35%, rgb(var(--paper)) 62%)" />}
+      <div className="relative grid grid-cols-[41%_1fr] items-end gap-5 pt-14">
         <div data-jacket-wrap>
-          <Tilt>
+          <div>
             <Link href={`/read/${it.slug}`} data-jacket className="block overflow-hidden rounded-[8px]" aria-label={`Open ${it.title}`}>
               <Cover title={it.title} color={it.color} sub={it.publisher} size="lg" image={it.image} />
             </Link>
-          </Tilt>
+          </div>
         </div>
         <div data-copy className="min-w-0">
           <p data-fade className="mb-2 text-[13px] font-semibold text-accent">Number {i + 1} in India this month</p>
-          <h1 key={it.slug} data-title className="js-hide font-display text-[clamp(30px,9vw,50px)] leading-[0.98] tracking-[-0.01em]">{it.title.replace(/:.*/, "")}</h1>
-          <p data-fade className="mt-2 text-[14px] font-medium text-muted">{it.author}</p>
-          <p data-fade className="mt-3 line-clamp-3 max-w-[38ch] text-[15px] leading-snug">{it.synopsis}</p>
+          <h1 key={it.slug} data-title className="js-hide font-display leading-[0.98] tracking-[-0.01em] [overflow-wrap:normal] [word-break:keep-all]" style={{ fontSize: `clamp(24px, ${Math.min(9, 54 / Math.max(6, ...it.title.replace(/:.*/, "").split(" ").map((w) => w.length)))}cqw, 48px)` }}>{it.title.replace(/:.*/, "")}</h1>
+          <p data-fade className="mt-2 text-[13.5px] font-medium text-muted">{it.author}</p>
+          {it.genres.length > 0 && <p data-fade className="mt-1 text-[12.5px] font-semibold">{it.genres.join("  •  ")}</p>}
+          <p data-fade className="mt-2.5 line-clamp-3 max-w-[38ch] text-[14.5px] leading-snug">{it.synopsis}</p>
           <div data-fade className="mt-5 flex flex-wrap items-center gap-2">
             <Link href={`/read/${it.slug}/1`} className="btn-primary">Read chapter 1</Link>
             <Link href={`/read/${it.slug}`} className="btn-ghost">Details</Link>

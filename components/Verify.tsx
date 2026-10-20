@@ -63,9 +63,9 @@ export default function Verify({ initialCode, signedIn }: { initialCode: string;
   return (
     <div className="space-y-5">
       <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 pt-7 dark:border-line">
-        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
+        <div className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative">
-          <h1 className="font-display text-[clamp(30px,9vw,46px)] leading-none">Is it real?</h1>
+          <h1 className="font-display text-[clamp(30px,9cqw,46px)] leading-none">Is it real?</h1>
           <p className="mt-2 max-w-[34ch] text-[15px] leading-snug">Scan the Torii code on any book or figure box. It takes a second.</p>
           <div className={`mt-5 overflow-hidden rounded-panel border border-line bg-black ${scanning ? "" : "hidden"}`}><div id="qr-reader" className="w-full" /></div>
           <div className="mt-4">

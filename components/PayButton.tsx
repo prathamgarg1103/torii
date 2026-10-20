@@ -89,8 +89,8 @@ function MockUpiSheet({ amount, description, onCancel, onPaid }: { amount: numbe
     try { await onPaid(); setStage("done"); } catch (e) { setMsg((e as Error).message); setStage("error"); }
   }
   return (
-    <div className="fixed inset-0 z-50 flex animate-fade-in items-end justify-center bg-black/40 backdrop-blur-[2px] sm:items-center" role="dialog" aria-modal="true" aria-label="UPI payment">
-      <div ref={panel} className="w-full max-w-md rounded-t-[24px] border border-b-0 border-line bg-card p-5 sm:rounded-[24px] sm:border-b-2 dark:border-line" style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}>
+    <div className="fixed inset-0 z-50 flex animate-fade-in items-end justify-center bg-black/40 backdrop-blur-[2px] " role="dialog" aria-modal="true" aria-label="UPI payment">
+      <div ref={panel} className="w-full max-w-[440px] rounded-t-[24px] border border-b-0 border-line bg-card p-5   dark:border-line" style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}>
         <div className="mb-1 flex items-center justify-between">
           <span className="rounded-md bg-warn/15 px-2 py-0.5 text-[12.5px] font-bold text-warn">Test payment, no real money moves</span>
           {stage === "choose" && <button className="text-sm text-muted" onClick={onCancel}>Cancel</button>}

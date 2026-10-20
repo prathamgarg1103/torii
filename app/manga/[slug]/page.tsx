@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { ownedVolumes, publisherName } from "@/lib/catalog";
+import { boxSetsOf, chapterAt, volumesOf } from "@/lib/derive";
 import { Cover } from "@/components/Art";
 import AddToCart from "@/components/AddToCart";
 import VolumeGrid from "@/components/VolumeGrid";
@@ -22,19 +23,19 @@ export default async function SeriesShop({ params }: { params: { slug: string } 
   const user = await currentUser();
   const owned = user ? ownedVolumes(db, user.id, s.id) : new Set<number>();
   const inCart = new Set(user ? db.cart.filter((c) => c.userId === user.id && c.kind === "volume").map((c) => c.refId) : []);
-  const vols = db.volumes.filter((v) => v.seriesId === s.id).sort((a, b) => a.number - b.number);
+  const vols = volumesOf(db, s);
   const missing = vols.filter((v) => !owned.has(v.number) && v.stock > 0 && !inCart.has(v.id));
   const missingTotal = missing.reduce((a, v) => a + v.price, 0);
-  const boxes = db.boxSets.filter((b) => b.seriesId === s.id);
+  const boxes = boxSetsOf(s);
   const prog = user ? db.progress.find((p) => p.userId === user.id && p.seriesId === s.id) : undefined;
-  const readVol = prog ? db.chapters.find((c) => c.seriesId === s.id && c.number === prog.chapter)?.volumeNumber ?? 0 : 0;
+  const readVol = prog ? chapterAt(db, s, prog.chapter)?.volumeNumber ?? 0 : 0;
   const pct = Math.round((owned.size / s.totalVolumes) * 100);
   const minPrice = Math.min(...vols.map((v) => v.price));
 
   return (
     <div className="space-y-7">
       <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 pt-6 dark:border-line">
-        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
+        <div className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative flex items-end gap-4">
           <div data-parallax="24" className="relative h-[190px] w-[150px] shrink-0">
             {[3, 2, 1].map((n, k) => (
@@ -44,7 +45,7 @@ export default async function SeriesShop({ params }: { params: { slug: string } 
             ))}
           </div>
           <div className="min-w-0 pb-1">
-            <h1 className="font-display text-[clamp(24px,7vw,38px)] leading-[1]">{s.title}</h1>
+            <h1 className="font-display text-[clamp(24px,7cqw,38px)] leading-[1]">{s.title}</h1>
             <p className="mt-2 text-[14px] font-semibold">{s.author}</p>
             <p className="text-[13.5px] text-muted">{publisherName(db, s.publisherId)}. {s.totalVolumes} volumes, from {inr(minPrice)}.</p>
           </div>

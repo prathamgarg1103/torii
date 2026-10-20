@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { canRead, isChapterFree, ownedVolumes } from "@/lib/catalog";
+import { chapterAt, volumeAt } from "@/lib/derive";
 import Reader from "@/components/Reader";
 import UnlockGate from "@/components/UnlockGate";
 import { LANGS, type Lang } from "@/lib/types";
@@ -17,12 +18,12 @@ export default async function ChapterPage({ params, searchParams }: { params: { 
   const db = await read();
   const s = db.series.find((x) => x.slug === params.slug);
   const n = parseInt(params.chapter, 10);
-  const ch = s && db.chapters.find((c) => c.seriesId === s.id && c.number === n);
+  const ch = s && chapterAt(db, s, n);
   if (!s || !ch) notFound();
   const user = await currentUser();
   const lang: Lang = s.languages.includes(searchParams.lang as Lang) ? (searchParams.lang as Lang) : "en";
   const langs = LANGS.filter((l) => s.languages.includes(l.code)).map((l) => ({ code: l.code, native: l.native }));
-  const next = db.chapters.find((c) => c.seriesId === s.id && c.number === n + 1);
+  const next = chapterAt(db, s, n + 1);
 
   if (!canRead(db, ch, user)) {
     return <UnlockGate slug={s.slug} title={s.title} chapter={n} chapterId={ch.id} lang={lang} price={CHAPTER_PRICE}
@@ -31,7 +32,7 @@ export default async function ChapterPage({ params, searchParams }: { params: { 
 
   // End-of-volume bridge to print: this chapter is the last one collected in its volume.
   const isVolumeEnd = ch.volumeNumber > 0 && (!next || next.volumeNumber !== ch.volumeNumber);
-  const vol = isVolumeEnd ? db.volumes.find((v) => v.seriesId === s.id && v.number === ch.volumeNumber) : undefined;
+  const vol = isVolumeEnd ? volumeAt(db, s, ch.volumeNumber) : undefined;
   const owns = vol && user ? ownedVolumes(db, user.id, s.id).has(vol.number) : false;
 
   return (

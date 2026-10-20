@@ -4,11 +4,11 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import AppShell from "@/components/AppShell";
 import SWRegister from "@/components/SWRegister";
-import MotionProvider from "@/components/MotionProvider";
 import NavProgress from "@/components/NavProgress";
+import DesktopAside from "@/components/DesktopAside";
 import { Suspense } from "react";
 import { currentUser } from "@/lib/auth";
-import { read } from "@/lib/db";
+import { catalogMeta, read } from "@/lib/db";
 import { APP_NAME, APP_TAGLINE } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -26,9 +26,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body className="min-h-screen font-sans antialiased">
-        <AppShell signedIn={!!user} cartCount={cartCount} wallet={user?.wallet ?? 0}>{children}</AppShell>
+        <AppShell signedIn={!!user} cartCount={cartCount} wallet={user?.wallet ?? 0} credit={catalogMeta().source === "anilist"}>{children}</AppShell>
+        <DesktopAside />
         <SWRegister />
-        <MotionProvider />
         <Suspense fallback={null}><NavProgress /></Suspense>
       </body>
     </html>

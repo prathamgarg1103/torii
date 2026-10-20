@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { canRead, isChapterFree, publisherName } from "@/lib/catalog";
+import { chaptersOf } from "@/lib/derive";
 import { Cover } from "@/components/Art";
 import ChapterList from "@/components/ChapterList";
+import BannerImg from "@/components/BannerImg";
 import { LANGS, type Lang } from "@/lib/types";
 import { CHAPTER_PRICE } from "@/lib/config";
 
@@ -22,7 +24,7 @@ export default async function SeriesRead({ params, searchParams }: { params: { s
   const user = await currentUser();
   const prog = user ? db.progress.find((p) => p.userId === user.id && p.seriesId === s.id) : undefined;
   const lang: Lang = (s.languages.includes(searchParams.lang as Lang) ? searchParams.lang : prog?.language && s.languages.includes(prog.language) ? prog.language : "en") as Lang;
-  const chs = db.chapters.filter((c) => c.seriesId === s.id).sort((a, b) => a.number - b.number);
+  const chs = chaptersOf(db, s);
   const rows = chs.map((c) => [c.number, c.volumeNumber, isChapterFree(db, c) ? 1 : 0, canRead(db, c, user) ? 1 : 0] as [number, number, number, number]);
   const lockedCount = rows.filter((r) => !r[3]).length;
   const startAt = prog ? prog.chapter : 1;
@@ -30,12 +32,13 @@ export default async function SeriesRead({ params, searchParams }: { params: { s
 
   return (
     <div className="space-y-7">
-      <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 pt-6 dark:border-line">
-        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
+      <section className={`paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 ${s.banner ? "pt-24" : "pt-6"}`}>
+        <div className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
+        {s.banner && <BannerImg src={s.banner} className="h-48" fade="linear-gradient(to bottom, rgb(var(--paper)/.2) 0%, rgb(var(--paper)/.7) 30%, rgb(var(--paper)) 48%)" />}
         <div className="relative flex gap-5">
           <div data-parallax="28" className="w-[38%] max-w-[170px] shrink-0"><Cover title={s.title} color={s.color} image={s.image} sub={pub} size="lg" /></div>
           <div className="min-w-0 self-end">
-            <h1 className="font-display text-[clamp(26px,7.5vw,40px)] leading-[1]">{s.title}</h1>
+            <h1 className="font-display text-[clamp(26px,7.5cqw,40px)] leading-[1]">{s.title}</h1>
             <p className="mt-2 text-[14.5px] font-semibold">{s.author}</p>
             <p className="text-[13.5px] text-muted">{pub}, since {s.startYear}</p>
             <div className="mt-3 flex flex-wrap gap-1.5">

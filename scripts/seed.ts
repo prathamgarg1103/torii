@@ -2,7 +2,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import type { Catalog, State, Series, Chapter, Volume, BoxSet, Figure, Event, Lang, AuthTag, User } from "../lib/types";
+import type { Catalog, State, Series, Figure, Event, Lang, AuthTag, User } from "../lib/types";
+import { fromAniList, PUBLISHERS, type AniItem } from "./anilist-map";
 
 // Load .env so tag signatures match the running app.
 const envFile = path.join(process.cwd(), ".env");
@@ -29,14 +30,9 @@ function weighted<T>(items: [T, number][]): T {
   return items[items.length - 1][0];
 }
 
-const publishers = [
-  { id: "shueisha", name: "Shueisha" },
-  { id: "kodansha", name: "Kodansha" },
-  { id: "shogakukan", name: "Shogakukan" },
-  { id: "square-enix", name: "Square Enix" },
-];
+const publishers = PUBLISHERS;
 
-type SeedSeries = Omit<Series, "id"> & { cpv: number; volPrice: number };
+type SeedSeries = Omit<Series, "id">;
 const S = (o: SeedSeries) => o;
 // Chapter/volume counts are approximate as of late 2026.
 const seriesSeed: SeedSeries[] = [
@@ -84,30 +80,21 @@ const seriesSeed: SeedSeries[] = [
     languages: ["en"], popularity: 68, totalChapters: 113, totalVolumes: 25, cpv: 4.52, volPrice: 349 }),
 ];
 
-const series: Series[] = []; const chapters: Chapter[] = []; const volumes: Volume[] = []; const boxSets: BoxSet[] = [];
-for (const s of seriesSeed) {
-  const { cpv, volPrice, ...rest } = s;
-  const sid = "s_" + s.slug;
-  series.push({ id: sid, ...rest });
-  for (let n = 1; n <= s.totalChapters; n++) {
-    const v = Math.ceil(n / cpv);
-    chapters.push({ id: `c_${s.slug}_${n}`, seriesId: sid, number: n, volumeNumber: v <= s.totalVolumes ? v : 0,
-      title: `Chapter ${n}`, pages: 6 + Math.floor(rand() * 4), freeOverride: null });
-  }
-  for (let v = 1; v <= s.totalVolumes; v++) {
-    const isImport = s.status === "ongoing" && v > s.totalVolumes - 2;
-    volumes.push({ id: `v_${s.slug}_${v}`, seriesId: sid, number: v, edition: isImport ? "import" : "india",
-      price: isImport ? 749 : volPrice, stock: rand() < 0.06 ? 0 : 20 + Math.floor(rand() * 180) });
-  }
-  if (s.status === "completed") {
-    const sum = volumes.filter((x) => x.seriesId === sid).reduce((a, x) => a + x.price, 0);
-    boxSets.push({ id: `b_${s.slug}_all`, seriesId: sid, title: `${s.title} Complete Box Set`, fromVol: 1, toVol: s.totalVolumes, price: Math.round((sum * 0.8) / 10) * 10 - 1 });
-  }
-  if (s.totalVolumes >= 12) {
-    const sum = s.volPrice * 10;
-    boxSets.push({ id: `b_${s.slug}_1`, seriesId: sid, title: `${s.title} Starter Box (Vol. 1–10)`, fromVol: 1, toVol: 10, price: Math.round((sum * 0.85) / 10) * 10 - 1 });
-  }
+// The 14 hand-built series. If `npm run import` has fetched AniList data, the top 400 Japanese
+// manga are used instead, with these 14 kept under their original slugs.
+const builtin: Series[] = seriesSeed.map((s) => ({ id: "s_" + s.slug, ...s }));
+let series: Series[] = builtin;
+let meta: Catalog["meta"] = { source: "builtin", fetchedAt: null, count: builtin.length };
+// `--fixture` uses a synthetic 430-title sample for testing layouts without network access.
+const aniFile = process.argv.includes("--fixture")
+  ? path.join(process.cwd(), "scripts", "fixtures", "anilist-sample.json")
+  : path.join(process.cwd(), "data", "anilist.json");
+if (fs.existsSync(aniFile) && !process.argv.includes("--builtin")) {
+  const raw = JSON.parse(fs.readFileSync(aniFile, "utf8")) as { fetchedAt: string; target?: number; items: AniItem[] };
+  series = fromAniList(raw.items, builtin, raw.target ?? 400);
+  meta = { source: process.argv.includes("--fixture") ? "builtin" : "anilist", fetchedAt: raw.fetchedAt, count: series.length };
 }
+const usedPublishers = new Set(series.map((s) => s.publisherId));
 
 type FS = [string, string, string, string, string, number, string, number, string, Figure["availability"], number | null, string | null];
 const figSeed: FS[] = [
@@ -156,7 +143,7 @@ const users: User[] = [
 
 const gojo = figures.find((f) => f.slug.startsWith("satoru-gojo-pop"))!;
 const luffy = figures.find((f) => f.slug.startsWith("monkey-d-luffy-gear"))!;
-const jjk1 = volumes.find((v) => v.id === "v_jujutsu-kaisen_1")!;
+const jjk1 = { id: "v_jujutsu-kaisen_1" };
 const tags: AuthTag[] = [
   { code: codeFor("GENUINE1"), kind: "figure", refId: gojo.id, title: gojo.name, editionNo: null, ownerId: null, registeredAt: null, registeredCity: null },
   { code: codeFor("GENUINE2"), kind: "volume", refId: jjk1.id, title: "Jujutsu Kaisen Vol. 1", editionNo: null, ownerId: null, registeredAt: null, registeredCity: null },
@@ -184,7 +171,7 @@ for (let i = 0; i < 1800; i++) {
   events.push({ id: "e" + i, type, seriesId: s.id, language: lang, state, city: pick(cities), amount, createdAt: t(rand() * 90) });
 }
 
-const catalog: Catalog = { publishers, series, chapters, volumes, boxSets, figures, events };
+const catalog: Catalog = { meta, publishers: publishers.filter((p) => usedPublishers.has(p.id)), series, figures, events };
 const state: State = {
   users, unlocks: [], progress: [], cart: [], orders: [], tags,
   ownership: [{ userId: "u_riya", kind: "figure", refId: luffy.id, source: "verify", createdAt: t(220) }],
@@ -196,7 +183,7 @@ fs.writeFileSync(path.join(dir, "catalog.json"), JSON.stringify(catalog));
 fs.writeFileSync(path.join(dir, "initial-state.json"), JSON.stringify(state, null, 1));
 // Reset local file-mode state. (On Redis, use "Reset demo data" in the publisher dashboard.)
 for (const f of ["state.json", "db.json"]) { try { fs.unlinkSync(path.join(dir, f)); } catch {} }
-console.log(`Seeded ${series.length} series, ${chapters.length} chapters, ${volumes.length} volumes, ${figures.length} figures, ${events.length} analytics events.`);
+console.log(`Seeded ${series.length} series (${meta.source}), ${series.reduce((a, x) => a + x.totalChapters, 0).toLocaleString()} chapters, ${series.reduce((a, x) => a + x.totalVolumes, 0).toLocaleString()} volumes, ${figures.length} figures, ${events.length} analytics events.`);
 console.log("Demo verification codes:");
 console.log("  Genuine (figure):          ", tags[0].code);
 console.log("  Genuine (volume):          ", tags[1].code);

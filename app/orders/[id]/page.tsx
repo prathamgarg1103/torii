@@ -44,7 +44,7 @@ export default async function OrderPage({ params, searchParams }: { params: { id
       <section>
         <h2 data-reveal="lines" className="h-section">Authenticity codes in your parcel</h2>
         <p className="mb-3 mt-1 text-[13.5px] text-muted">Each item ships with one of these on its tag or inside cover. For this demo, scan one with another phone, or tap it.</p>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 ">
           {codes.slice(0, 24).map((c, i) => (
             <Link key={c.code} href={`/verify?code=${c.code}`} className="card p-2.5 text-center hover:border-ink">
               {/* eslint-disable-next-line @next/next/no-img-element */}

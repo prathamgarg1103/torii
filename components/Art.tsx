@@ -1,3 +1,4 @@
+import CoverImg from "./CoverImg";
 /* Original generated artwork: manga-panel book jackets and studio renders of an abstract
    figure. No copyrighted covers, characters or product photos. If a publisher supplies
    official art, pass `image` and it is used instead. */
@@ -36,8 +37,7 @@ export function Cover({ title, color, sub, vol, size = "md", dim = false, image,
   { title: string; color: string; sub?: string; vol?: number; size?: "sm" | "md" | "lg"; dim?: boolean; image?: string; className?: string }) {
   const wrapCls = `relative aspect-[2/3] w-full overflow-hidden rounded-[8px] bg-ink ring-1 ring-inset ring-black/10 ${size === "sm" ? "shadow-panel-sm" : "shadow-panel"} ${dim ? "opacity-35 saturate-0" : ""} ${className}`;
   if (image) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <div className={wrapCls}><img src={image} alt={`${title} cover`} className="h-full w-full object-cover" loading="lazy" /></div>;
+    return <div className={`${wrapCls} [container-type:inline-size]`}><CoverImg src={image} title={title} color={color} eager={size === "lg"} /></div>;
   }
   const seed = hash(title);
   const r = rng(seed + (vol ?? 0) * 7919);

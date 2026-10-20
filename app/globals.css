@@ -42,9 +42,18 @@ html.lenis, html.lenis body { height: auto; }
 /* Screentone texture, kept faint. */
 .tone { background-image: radial-gradient(rgb(var(--ink) / .10) 1px, transparent 1.2px); background-size: 7px 7px; }
 .paper-band { background: rgb(var(--paper)); }
-/* Full-bleed band whose content still lines up with the page column. */
-.bleed { margin-inline: calc(50% - 50vw); padding-inline: calc(50vw - 50%); }
+/* Torii is a phone app: one phone-width column, even on a computer. */
+:root { --app-w: 440px; }
+.app-col { width: 100%; max-width: var(--app-w); margin-inline: auto; min-height: 100vh; background: rgb(var(--bg)); container-type: inline-size; position: relative; }
+.app-fixed { position: fixed; left: 50%; transform: translateX(-50%); width: 100%; max-width: var(--app-w); }
+@media (min-width: 640px) {
+  body { background: rgb(var(--ink)); }
+  .app-col { box-shadow: 0 0 0 1px rgb(255 255 255 / .06), 0 30px 80px -20px rgb(0 0 0 / .6); }
+}
+/* Bands run the full width of the phone column. */
+.bleed { margin-inline: -1rem; padding-inline: 1rem; }
 body { overflow-x: clip; }
+.row-lazy { content-visibility: auto; contain-intrinsic-size: auto 280px; }
 .skeleton { background: linear-gradient(90deg, rgb(var(--line) / .7) 25%, rgb(var(--card)) 37%, rgb(var(--line) / .7) 63%); background-size: 400% 100%; @apply animate-shimmer; }
 .rv-line { padding-bottom: .08em; margin-bottom: -.08em; }
 /* Hero headline is revealed by GSAP; if scripts never run, it appears anyway. */

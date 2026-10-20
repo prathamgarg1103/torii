@@ -1,6 +1,7 @@
 import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { canRead } from "@/lib/catalog";
+import { chapterAt } from "@/lib/derive";
 import { LANGS } from "@/lib/types";
 
 // Generates placeholder manga pages as SVG. Locked chapters return 403, so pages can't be fetched directly.
@@ -9,7 +10,7 @@ export async function GET(req: Request) {
   const slug = u.searchParams.get("s") || "", c = Number(u.searchParams.get("c")), p = Number(u.searchParams.get("p")), l = u.searchParams.get("l") || "en";
   const db = await read();
   const s = db.series.find((x) => x.slug === slug);
-  const ch = s && db.chapters.find((x) => x.seriesId === s.id && x.number === c);
+  const ch = s && chapterAt(db, s, c);
   if (!s || !ch || !(p >= 1 && p <= ch.pages)) return new Response("Not found", { status: 404 });
   if (!canRead(db, ch, (await currentUser()))) return new Response("Locked", { status: 403 });
   const lang = LANGS.find((x) => x.code === l) ?? LANGS[0];

@@ -40,7 +40,7 @@ export default function FigureCatalog({ items }: { items: F[] }) {
         <select className="input" value={scale} onChange={(e) => setScale(e.target.value)} aria-label="Scale"><option value="">Any scale</option>{uniq("scale").map((x) => <option key={x}>{x}</option>)}</select>
       </div>
       <div className="text-[13px] text-muted">{list.length} figures</div>
-      <div ref={grid} data-reveal="stagger" className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3">
+      <div ref={grid} data-reveal="stagger" className="grid grid-cols-2 gap-x-3 gap-y-5 ">
         {list.map((f) => (
           <Link key={f.slug} href={`/figures/${f.slug}`} className="group">
             <div className="relative overflow-hidden rounded-panel border border-line dark:border-line">

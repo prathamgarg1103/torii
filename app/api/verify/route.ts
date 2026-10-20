@@ -2,6 +2,7 @@ import { mutate, read, now } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { normalizeCode, signatureValid } from "@/lib/tags";
 import { addOwnership } from "@/lib/payments";
+import { volumeById } from "@/lib/derive";
 import { fmtDate } from "@/lib/format";
 import { body, ok } from "@/lib/api";
 
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
 
   const user = await currentUser();
   const fig = tag.kind === "figure" ? db0.figures.find((f) => f.id === tag.refId) : undefined;
-  const vol = tag.kind === "volume" ? db0.volumes.find((v) => v.id === tag.refId) : undefined;
+  const vol = tag.kind === "volume" ? volumeById(db0, tag.refId) : undefined;
   const series = db0.series.find((s) => s.id === (fig?.seriesId ?? vol?.seriesId));
   const href = fig ? `/figures/${fig.slug}` : `/manga/${series?.slug}`;
   const licensor = fig ? fig.licensor : db0.publishers.find((p) => p.id === series?.publisherId)?.name ?? "";

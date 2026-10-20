@@ -57,30 +57,26 @@ async function saveState(s: State) {
   fs.renameSync(FILE + ".tmp", FILE);
 }
 
-/** Merge static catalogue + state. `deep` clones mutable catalogue rows so mutate() can edit them safely. */
+/** Merge static catalogue + state. `deep` copies figures so mutate() can edit them safely. */
 function compose(s: State, deep: boolean): DB {
-  const chapters = catalog.chapters.map((c) => {
-    const o = s.chapterOverrides[c.id];
-    return o === undefined ? (deep ? { ...c } : c) : { ...c, freeOverride: o };
-  });
-  const volumes = catalog.volumes.map((v) => (s.stock[v.id] !== undefined ? { ...v, stock: s.stock[v.id] } : deep ? { ...v } : v));
   const figures = catalog.figures.map((f) => {
     const st = s.stock[f.id], ed = s.editionSold[f.id];
     return st === undefined && ed === undefined ? (deep ? { ...f } : f) : { ...f, stock: st ?? f.stock, editionSold: ed ?? f.editionSold };
   });
+  const figIds = new Set(catalog.figures.map((f) => f.id));
+  const stock: Record<string, number> = {};
+  for (const [k, v] of Object.entries(s.stock)) if (!figIds.has(k)) stock[k] = v;
   return {
-    publishers: catalog.publishers, series: catalog.series, boxSets: catalog.boxSets, chapters, volumes, figures,
+    publishers: catalog.publishers, series: catalog.series, figures,
     users: s.users, unlocks: s.unlocks, progress: s.progress, cart: s.cart, orders: s.orders, tags: s.tags,
     ownership: s.ownership, settings: s.settings, events: [...catalog.events, ...s.events],
+    chapterOverrides: deep ? { ...s.chapterOverrides } : s.chapterOverrides, stock,
   };
 }
 
 /** Pull the changed parts of a DB back out into a State document. */
 function decompose(db: DB): State {
-  const chapterOverrides: Record<string, boolean> = {};
-  db.chapters.forEach((c, i) => { if (c.freeOverride !== catalog.chapters[i].freeOverride && c.freeOverride !== null) chapterOverrides[c.id] = c.freeOverride; });
-  const stock: Record<string, number> = {}, editionSold: Record<string, number> = {};
-  db.volumes.forEach((v, i) => { if (v.stock !== catalog.volumes[i].stock) stock[v.id] = v.stock; });
+  const stock: Record<string, number> = { ...db.stock }, editionSold: Record<string, number> = {};
   db.figures.forEach((f, i) => {
     if (f.stock !== catalog.figures[i].stock) stock[f.id] = f.stock;
     if (f.editionSold !== catalog.figures[i].editionSold) editionSold[f.id] = f.editionSold;
@@ -88,9 +84,11 @@ function decompose(db: DB): State {
   return {
     users: db.users, unlocks: db.unlocks, progress: db.progress, cart: db.cart, orders: db.orders, tags: db.tags,
     ownership: db.ownership, settings: db.settings, events: db.events.slice(catalog.events.length),
-    chapterOverrides, stock, editionSold,
+    chapterOverrides: db.chapterOverrides, stock, editionSold,
   };
 }
+
+export const catalogMeta = () => catalog.meta;
 
 export async function read(): Promise<DB> {
   return compose(await loadState(), false);

@@ -19,7 +19,7 @@ export default function LoginForm({ next }: { next: string }) {
   return (
     <div className="mx-auto max-w-sm">
       <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-7 pt-8 text-center dark:border-line">
-        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
+        <div className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-[rgb(230,0,51)] text-white shadow-panel"><Torii className="h-8 w-8" /></span>
           <h1 className="h-title mt-4">Sign in to Torii</h1>

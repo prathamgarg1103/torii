@@ -2,6 +2,7 @@ import { mutate, read, now } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { canRead, } from "@/lib/catalog";
 import { logRead } from "@/lib/payments";
+import { chapterAt } from "@/lib/derive";
 import { body, fail, ok } from "@/lib/api";
 import type { Lang } from "@/lib/types";
 
@@ -9,7 +10,7 @@ export async function POST(req: Request) {
   const { slug, chapter, language } = await body<{ slug: string; chapter: number; language: Lang }>(req);
   const db0 = await read();
   const s = db0.series.find((x) => x.slug === slug);
-  const ch = s && db0.chapters.find((c) => c.seriesId === s.id && c.number === Number(chapter));
+  const ch = s && chapterAt(db0, s, Number(chapter));
   if (!s || !ch) return fail("Not found", 404);
   const user = await currentUser();
   if (!canRead(db0, ch, user)) return fail("Locked", 403);

@@ -32,7 +32,7 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
 
   return (
     <div className="space-y-3">
-      <div data-reveal="stagger" className="grid grid-cols-2 gap-2 md:grid-cols-5">
+      <div data-reveal="stagger" className="grid grid-cols-2 gap-2 ">
         {tiles.map(([l, v, s], k) => <div key={l} className={k === 4 ? "panel paper-band p-3.5" : "card p-3.5"}><div className="label">{l}</div><div data-count className="price mt-1 text-[24px] leading-none">{v}</div><div className="mt-1 text-[12px] text-muted">{s}</div></div>)}
       </div>
 
@@ -50,7 +50,7 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
         </Card>
       )}
 
-      <div data-reveal="stagger" className="grid gap-3 md:grid-cols-3">
+      <div data-reveal="stagger" className="grid gap-3 ">
         <Card title="Conversion funnel" sub="Free reading → paid chapters → printed volumes">
           <div className="space-y-2 pt-1">
             {funnel.map((f, i) => (
@@ -61,14 +61,14 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
             ))}
           </div>
         </Card>
-        <div className="md:col-span-2">
+        <div className="">
           <Card title="Weekly paid revenue" sub="Chapter unlocks + print + figures">
             <div className="h-48"><ResponsiveContainer><LineChart data={trend}><CartesianGrid stroke="rgb(var(--line))" vertical={false} /><XAxis dataKey="week" {...axis} /><YAxis {...axis} tickFormatter={(v) => `₹${Math.round(v / 1000)}k`} width={44} /><Tooltip {...tip} formatter={(v: number) => inr(v)} /><Line dataKey="revenue" stroke={C1} strokeWidth={2.5} dot={false} /></LineChart></ResponsiveContainer></div>
           </Card>
         </div>
       </div>
 
-      <div data-reveal="stagger" className="grid gap-3 md:grid-cols-2">
+      <div data-reveal="stagger" className="grid gap-3 ">
         <Card title="Top series by reads">
           <div className="h-72"><ResponsiveContainer><BarChart data={sortedSeries} layout="vertical" margin={{ left: 8 }}><XAxis type="number" {...axis} /><YAxis type="category" dataKey="name" {...axis} width={110} /><Tooltip {...tip} /><Bar dataKey="reads" fill={C1} radius={[0, 4, 4, 0]} /></BarChart></ResponsiveContainer></div>
         </Card>
@@ -77,7 +77,7 @@ export default function Dashboard({ kpis, bySeries, byLang, byState, trend, topC
         </Card>
       </div>
 
-      <div data-reveal="stagger" className="grid gap-3 md:grid-cols-3">
+      <div data-reveal="stagger" className="grid gap-3 ">
         <Card title="By language" sub="Chapter reads and paid unlocks">
           <div className="h-64"><ResponsiveContainer><BarChart data={byLang}><CartesianGrid stroke="rgb(var(--line))" vertical={false} /><XAxis dataKey="name" {...axis} /><YAxis {...axis} width={36} /><Tooltip {...tip} /><Legend wrapperStyle={{ fontSize: 12 }} /><Bar dataKey="reads" name="Reads" fill={C1} radius={[4, 4, 0, 0]} /><Bar dataKey="paid" name="Paid unlocks" fill={C3} radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div>
         </Card>

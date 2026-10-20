@@ -25,7 +25,7 @@ export default async function Tags() {
     <div className="space-y-4">
       <div><div className="label">Demo</div><h1 className="h-title">Authenticity codes</h1>
         <p className="text-sm text-muted">Scan these with a phone camera, or open them in Verify. Re-run <code>npm run seed</code> to reset their state.</p></div>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 ">
         {demo.map((d, i) => (
           <Link key={d.code} href={`/verify?code=${d.code}`} className="card p-3 text-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}

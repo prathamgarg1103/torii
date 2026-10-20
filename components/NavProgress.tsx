@@ -30,5 +30,5 @@ export default function NavProgress() {
     gsap.timeline().to(bar.current, { scaleX: 1, duration: 0.35, ease: EASE }).to(bar.current, { opacity: 0, duration: 0.4 }, "+=0.05");
   }, [path, qs]);
 
-  return <div ref={bar} aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[2.5px] origin-left scale-x-0 bg-[rgb(var(--accent))] opacity-0" style={{ top: "env(safe-area-inset-top)" }} />;
+  return <div ref={bar} aria-hidden className="pointer-events-none app-fixed top-0 z-[60] h-[2.5px] origin-left scale-x-0 bg-[rgb(var(--accent))] opacity-0" style={{ top: "env(safe-area-inset-top)" }} />;
 }

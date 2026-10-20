@@ -3,6 +3,7 @@ import RevealScope from "@/components/RevealScope";
 import { read } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { ownedVolumes } from "@/lib/catalog";
+import { chapterAt } from "@/lib/derive";
 import { Cover, FigureArt, hueShift } from "@/components/Art";
 import { LANGS } from "@/lib/types";
 
@@ -23,11 +24,11 @@ export default async function Shelf() {
   const progress = db.progress.filter((p) => p.userId === user.id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const unlocks = db.unlocks.filter((u) => u.userId === user.id);
   const ownedVolIds = new Set(db.ownership.filter((o) => o.userId === user.id && o.kind === "volume").map((o) => o.refId));
-  const seriesWithVols = db.series.filter((s) => db.volumes.some((v) => v.seriesId === s.id && ownedVolIds.has(v.id)));
+  const seriesWithVols = db.series.filter((s) => Array.from(ownedVolIds).some((id) => id.startsWith(`v_${s.slug}_`)));
   const figs = db.ownership.filter((o) => o.userId === user.id && o.kind === "figure").map((o) => ({ o, f: db.figures.find((f) => f.id === o.refId)! })).filter((x) => x.f);
   const gaps = progress.map((p) => {
     const s = db.series.find((x) => x.id === p.seriesId)!;
-    const ch = db.chapters.find((c) => c.seriesId === s.id && c.number === p.chapter);
+    const ch = chapterAt(db, s, p.chapter);
     const readVol = ch?.volumeNumber || s.totalVolumes;
     const owned = Array.from(ownedVolumes(db, user.id, s.id));
     const missing = Array.from({ length: readVol }, (_, i) => i + 1).filter((n) => !owned.includes(n));
@@ -38,9 +39,9 @@ export default async function Shelf() {
   return (
     <div className="space-y-8">
       <section className="paper-band bleed relative -mt-5 overflow-hidden border-b border-line px-4 pb-6 pt-7 dark:border-line">
-        <div data-parallax="-36" className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
+        <div className="tone pointer-events-none absolute -inset-y-12 inset-x-0 opacity-60" />
         <div className="relative">
-          <h1 className="font-display text-[clamp(30px,9vw,46px)] leading-none">{user.name ? `${user.name}'s shelf` : "Your shelf"}</h1>
+          <h1 className="font-display text-[clamp(30px,9cqw,46px)] leading-none">{user.name ? `${user.name}'s shelf` : "Your shelf"}</h1>
           <dl className="mt-5 grid grid-cols-4 gap-2">
             {[[progress.length, "reading"], [unlocks.length, "chapters unlocked"], [ownedVolIds.size, "books owned"], [figs.length, "figures"]].map(([n, l]) => (
               <div key={String(l)} className="rounded-xl bg-card/80 px-2 py-2.5 text-center ring-1 ring-inset ring-fg/10"><dd data-count className="price text-[24px] leading-none">{n}</dd><dt className="mt-1 text-[11.5px] leading-tight text-muted">{l}</dt></div>

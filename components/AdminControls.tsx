@@ -25,7 +25,7 @@ export default function AdminControls({ mode, slugs, overrides }: { mode: "free"
     location.href = "/login?next=/publisher";
   }
   return (
-    <div className="grid gap-3 md:grid-cols-2">
+    <div className="grid gap-3 ">
       <div className="card p-4">
         <div className="label">Reading mode</div>
         <div className="mt-2 flex rounded-xl border border-line p-1 dark:border-line">

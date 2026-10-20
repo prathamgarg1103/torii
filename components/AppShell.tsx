@@ -23,7 +23,7 @@ const NAV: { href: string; key: SectionKey; label: string; Icon: (p: { className
 ];
 const useIso = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-export default function AppShell({ children, signedIn, cartCount, wallet }: { children: React.ReactNode; signedIn: boolean; cartCount: number; wallet: number }) {
+export default function AppShell({ children, signedIn, cartCount, wallet, credit = false }: { children: React.ReactNode; signedIn: boolean; cartCount: number; wallet: number; credit?: boolean }) {
   const path = usePathname() || "/";
   const section = sectionFor(path);
   const isReader = /^\/read\/[^/]+\/\d+/.test(path);
@@ -51,13 +51,12 @@ export default function AppShell({ children, signedIn, cartCount, wallet }: { ch
     return () => window.removeEventListener("scroll", on);
   }, []);
 
-  if (isReader) return <div data-section="read" key={path} className="animate-page-in">{children}</div>;
-  const width = isPublisher ? "max-w-6xl" : "max-w-3xl";
+  if (isReader) return <div data-section="read" className="app-col"><div key={path} className="animate-page-in">{children}</div></div>;
 
   return (
-    <div data-section={section} className="min-h-screen">
-      <header className={`sticky top-0 z-30 border-b transition-[background-color,border-color,box-shadow] duration-500 ease-out ${scrolled ? "border-line bg-[rgb(var(--paper)/.82)] shadow-[0_8px_24px_-18px_rgb(var(--ink)/.5)] backdrop-blur-xl" : "border-transparent bg-[rgb(var(--paper))]"}`} style={{ paddingTop: "env(safe-area-inset-top)" }}>
-        <div className={`mx-auto flex items-center gap-2.5 px-4 transition-[height] duration-500 ease-out ${scrolled ? "h-[52px]" : "h-[60px]"} ${width}`}>
+    <div data-section={section} className="app-col">
+      <header className={`sticky top-0 z-30 border-b transition-[background-color,border-color,box-shadow] duration-500 ease-out bg-[rgb(var(--paper))] ${scrolled ? "border-line shadow-[0_8px_24px_-18px_rgb(var(--ink)/.5)]" : "border-transparent"}`} style={{ paddingTop: "env(safe-area-inset-top)" }}>
+        <div className={`flex items-center gap-2.5 px-4 transition-[height] duration-500 ease-out ${scrolled ? "h-[52px]" : "h-[60px]"}`}>
           <Link href="/read" className="group flex items-center gap-2 text-fg" aria-label={`${APP_NAME} home`}>
             <span className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-[rgb(222,0,52)] text-white shadow-panel-sm transition-transform duration-500 ease-out group-hover:scale-105"><Torii className="h-[18px] w-[18px]" /></span>
             <span className="font-display text-[19px] leading-none">{APP_NAME}</span>
@@ -65,7 +64,7 @@ export default function AppShell({ children, signedIn, cartCount, wallet }: { ch
           <span key={tag} className="animate-fade-in rounded-full bg-card/70 px-2.5 py-0.5 text-[12.5px] font-semibold text-fg ring-1 ring-inset ring-fg/10" aria-label={`Section: ${tag}`}>{tag}</span>
           <div className="ml-auto flex items-center gap-0.5">
             {signedIn && (
-              <Link href="/account" className="mr-1 hidden rounded-full bg-card/70 px-3 py-1 text-[13px] font-semibold tabular-nums ring-1 ring-inset ring-fg/10 transition hover:bg-card sm:block" title="Wallet balance">
+              <Link href="/account" className="mr-1 hidden rounded-full bg-card/70 px-3 py-1 text-[13px] font-semibold tabular-nums ring-1 ring-inset ring-fg/10 transition hover:bg-card " title="Wallet balance">
                 Wallet ₹{wallet.toLocaleString("en-IN")}
               </Link>
             )}
@@ -81,10 +80,12 @@ export default function AppShell({ children, signedIn, cartCount, wallet }: { ch
           </div>
         </div>
       </header>
-      <main className={`mx-auto px-4 pb-32 pt-5 ${width}`}><div key={path} className="animate-page-in">{children}</div></main>
-      {!isPublisher && (
-        <nav className="fixed inset-x-0 bottom-0 z-30 px-3" style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }} aria-label="Sections">
-          <div ref={navRef} className="relative mx-auto grid max-w-md grid-cols-5 rounded-[22px] bg-[rgb(var(--ink)/.92)] p-1.5 shadow-lift ring-1 ring-white/10 backdrop-blur-xl dark:bg-[rgb(var(--card)/.92)]">
+      <main className="px-4 pb-32 pt-5"><div key={path} className="animate-page-in">{children}</div>
+        {credit && <p className="mt-10 text-center text-[11.5px] leading-relaxed text-muted">Covers, banners and synopses from <a href="https://anilist.co" className="underline underline-offset-2">AniList</a>. Artwork © its publishers. Shown for demonstration only.</p>}
+      </main>
+      {(
+        <nav className="app-fixed bottom-0 z-30 px-3" style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }} aria-label="Sections">
+          <div ref={navRef} className="relative mx-auto grid max-w-md grid-cols-5 rounded-[22px] bg-ink p-1.5 shadow-lift ring-1 ring-white/10 dark:bg-card">
             <span ref={pillRef} aria-hidden className="absolute left-0 top-1.5 h-[calc(100%-12px)] rounded-[16px] bg-[rgb(var(--paper))] opacity-0 shadow-[inset_0_1px_0_rgb(255_255_255/.5)]" />
             {NAV.map(({ href, key, label, Icon }) => {
               const on = activeKey === key;

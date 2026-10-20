@@ -43,7 +43,7 @@ export default function VolumeGrid({ vols, title, color, signedIn }: { vols: V[]
           <div className="-mx-3 mt-0 h-3 border-t border-line bg-[repeating-linear-gradient(90deg,rgb(var(--line)),rgb(var(--line))_6px,rgb(var(--card))_6px,rgb(var(--card))_12px)] dark:border-line" />
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-6">
+        <div className="grid grid-cols-4 gap-2.5 ">
           {vols.map((v) => (
             <button key={v.id} onClick={() => setSel(v)} className="text-left" aria-label={`Volume ${v.number}`}>
               <Cover title={title} color={color} vol={v.number} size="sm" dim={!v.owned} />
@@ -58,7 +58,7 @@ export default function VolumeGrid({ vols, title, color, signedIn }: { vols: V[]
 
       {sel && (
         <div className="fixed inset-0 z-50 flex animate-fade-in items-end justify-center bg-black/40 backdrop-blur-[2px]" onClick={close}>
-          <div ref={sheet} role="dialog" aria-label={`Volume ${sel.number}`} className="w-full max-w-md rounded-t-[24px] border border-b-0 border-line bg-card p-5 dark:border-line" onClick={(e) => e.stopPropagation()} style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}>
+          <div ref={sheet} role="dialog" aria-label={`Volume ${sel.number}`} className="w-full max-w-[440px] rounded-t-[24px] border border-b-0 border-line bg-card p-5 dark:border-line" onClick={(e) => e.stopPropagation()} style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}>
             <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-line" />
             <div className="flex gap-4">
               <div className="w-28 shrink-0 "><Cover title={title} color={color} vol={sel.number} size="md" /></div>
