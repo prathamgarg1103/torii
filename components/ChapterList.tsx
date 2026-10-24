@@ -5,7 +5,7 @@ import { EASE, gsap, reduced } from "@/lib/motion";
 import { IconLock, IconCheck } from "./Icons";
 
 type Row = [number, number, number, number]; // number, volume, free, canRead
-export default function ChapterList({ slug, lang, rows, readUpTo, totalVolumes }: { slug: string; lang: string; rows: Row[]; readUpTo: number; totalVolumes: number }) {
+export default function ChapterList({ slug, lang, rows, readUpTo, totalVolumes, titles }: { slug: string; lang: string; rows: Row[]; readUpTo: number; totalVolumes: number; titles?: string[] }) {
   const [desc, setDesc] = useState(false);
   const [jump, setJump] = useState("");
   const groups = useMemo(() => {
@@ -50,7 +50,7 @@ export default function ChapterList({ slug, lang, rows, readUpTo, totalVolumes }
                   {list.map(([n, , free, ok]) => (
                     <li key={n}>
                       <Link href={`/read/${slug}/${n}?lang=${lang}`} className="flex min-h-[48px] items-center gap-2 px-4 text-[14.5px] hover:bg-accentsoft/50">
-                        <span className={n <= readUpTo ? "text-muted" : "font-semibold"}>Chapter {n}</span>
+                        <span className={`min-w-0 truncate ${n <= readUpTo ? "text-muted" : "font-semibold"}`}>Chapter {n}{titles?.[n - 1] && titles[n - 1] !== `Chapter ${n}` ? `: ${titles[n - 1]}` : ""}</span>
                         {n === readUpTo && <span className="rounded-md bg-ink px-1.5 py-0.5 text-[11px] font-bold text-white dark:bg-fg dark:text-bg">Last read</span>}
                         <span className="ml-auto text-[13px] font-bold">
                           {free ? <span className="text-ok">Free</span> : ok ? <span className="text-ok">Yours</span> : <span className="flex items-center gap-1 text-accent"><IconLock className="h-3.5 w-3.5" />₹9</span>}

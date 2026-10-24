@@ -5,7 +5,7 @@ import { IconBack, IconLock } from "./Icons";
 import AddToCart from "./AddToCart";
 
 type Props = {
-  slug: string; title: string; chapter: number; pages: number; lang: string; langs: { code: string; native: string }[]; total: number;
+  slug: string; title: string; chapter: number; chapterTitle?: string; pages: number; lang: string; langs: { code: string; native: string }[]; total: number;
   next: { number: number; locked: boolean; free: boolean } | null;
   bridge: { volumeId: string; number: number; price: number; edition: string; inStock: boolean; owned: boolean } | null;
   signedIn: boolean;
@@ -70,7 +70,7 @@ export default function Reader(p: Props) {
           <Link href={`/read/${p.slug}?lang=${p.lang}`} className="p-2" aria-label="Back to series"><IconBack /></Link>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-semibold">{p.title}</div>
-            <div className="text-[11px] text-white/60">Chapter {p.chapter} of {p.total.toLocaleString("en-IN")}</div>
+            <div className="truncate text-[11px] text-white/60">Chapter {p.chapter} of {p.total.toLocaleString("en-IN")}{p.chapterTitle ? ` · ${p.chapterTitle}` : ""}</div>
           </div>
           <select className="rounded-lg bg-white/10 px-2 py-1 text-xs" value={p.lang} aria-label="Language"
             onChange={(e) => (location.href = `/read/${p.slug}/${p.chapter}?lang=${e.target.value}`)}>

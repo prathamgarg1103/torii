@@ -6,3 +6,4 @@ data/*.tmp
 *.tsbuildinfo
 .env.local
 .vercel
+data/uploads/

@@ -51,6 +51,8 @@ export default function AppShell({ children, signedIn, cartCount, wallet, credit
     return () => window.removeEventListener("scroll", on);
   }, []);
 
+  // The Partner Portal (for publishers) is a desktop tool with its own layout.
+  if (path.startsWith("/partner")) return <>{children}</>;
   if (isReader) return <div data-section="read" className="app-col"><div key={path} className="animate-page-in">{children}</div></div>;
 
   return (

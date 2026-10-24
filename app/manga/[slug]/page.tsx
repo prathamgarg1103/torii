@@ -1,6 +1,6 @@
 import Link from "next/link";
 import RevealScope from "@/components/RevealScope";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { ownedVolumes, publisherName } from "@/lib/catalog";
@@ -20,6 +20,8 @@ export default async function SeriesShop({ params }: { params: { slug: string } 
   const db = await read();
   const s = db.series.find((x) => x.slug === params.slug);
   if (!s) notFound();
+  // Titles without print rights (or not enough chapters for a volume yet) are read-only.
+  if (!s.totalVolumes) redirect(`/read/${s.slug}`);
   const user = await currentUser();
   const owned = user ? ownedVolumes(db, user.id, s.id) : new Set<number>();
   const inCart = new Set(user ? db.cart.filter((c) => c.userId === user.id && c.kind === "volume").map((c) => c.refId) : []);

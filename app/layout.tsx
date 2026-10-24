@@ -6,6 +6,7 @@ import AppShell from "@/components/AppShell";
 import SWRegister from "@/components/SWRegister";
 import NavProgress from "@/components/NavProgress";
 import DesktopAside from "@/components/DesktopAside";
+import HideOn from "@/components/HideOn";
 import { Suspense } from "react";
 import { currentUser } from "@/lib/auth";
 import { read } from "@/lib/db";
@@ -27,7 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <body className="min-h-screen font-sans antialiased">
         <AppShell signedIn={!!user} cartCount={cartCount} wallet={user?.wallet ?? 0} credit>{children}</AppShell>
-        <DesktopAside />
+        <HideOn prefix="/partner"><DesktopAside /></HideOn>
         <SWRegister />
         <Suspense fallback={null}><NavProgress /></Suspense>
       </body>

@@ -8,7 +8,7 @@ Torii is a mobile-first web app (installable PWA) run by Japanese publishers. It
 | **Manga** | Every printed volume in order, India-printed editions from ₹299, box sets, and one-tap "add missing volumes". |
 | **Figures** | Licensed action figures, from ₹649 minis to numbered 1/7-scale limited editions. |
 
-All three share one account (phone + OTP), one cart, one UPI wallet, **My Shelf** (reading progress, volumes and figures owned, gaps highlighted) and **Verify** (scan the signed authenticity code on any product). The **publisher dashboard** at `/publisher` shows the Japanese publishers what India reads and buys, by series, language, state and city. It also holds the reading-mode switch.
+All three share one account (phone + OTP), one cart, one UPI wallet, **My Shelf** (reading progress, volumes and figures owned, gaps highlighted) and **Verify** (scan the signed authenticity code on any product). Japanese publishers submit and manage their own series in the **Partner Portal** at `/partner` (see below). The **publisher dashboard** at `/publisher` shows the Japanese publishers what India reads and buys, by series, language, state and city. It also holds the reading-mode switch.
 
 ## Phone only
 
@@ -55,6 +55,53 @@ The **Read** home is laid out like Netflix:
 - rows for Shonen, Seinen, Shojo and each genre, plus Read in Hindi or Tamil, Highest rated, Completed and New this decade
 
 Every row has a "See all" link to a filterable, paged browse page.
+
+## Partner Portal: Japanese publishers submit their manga
+
+Publishers have their own sign-in and console at **`/partner`**. It's separate from the fan app (work email and password instead of phone OTP, its own session cookie), and it's a full-width desktop layout because publishers work at desks in Tokyo.
+
+| Path | What it does |
+|---|---|
+| `/partner` | The partner programme: how it works, the standard terms (70% of ₹9 unlocks, 40% print royalty, 15% merchandise royalty, paid monthly), live store figures |
+| `/partner/apply` | A new publisher joins: company (English and Japanese name), owner account, accepts the terms. They can prepare titles at once; nothing goes live and no sales data is shown until Torii **verifies** the company |
+| `/partner/login` | Sign in |
+| `/partner/dashboard` | What needs attention (changes requested, unfinished drafts, titles in review), KPIs and earnings, recent activity |
+| `/partner/titles` | Every title by status, plus the series Torii already carries for that publisher |
+| `/partner/titles/[id]` | The title editor: details, synopsis, genres, age rating, cover and banner, **licensed languages, rights (digital/print/merch), term, exclusivity, reader pricing**, chapters, a readiness checklist, a store preview and the review history |
+| `/partner/titles/[id]/chapters/[cid]` | Upload pages per language (images or a **.cbz/.zip**, ordered by file name), drag to reorder, preview, and release: hold, release now, or **schedule** (e.g. "Next Monday 00:00 JST" for a simulpub) |
+| `/partner/insights` | The India dashboard (reads, unlocks, states, cities, Translate next) for that publisher's titles only |
+| `/partner/earnings` | Monthly statements with the publisher's share per revenue stream and payout status |
+
+**Torii staff** review titles in the main app at **`/publisher/review`** (sign in as `9999999999`): verify publishers, then approve, ask for changes (with a note the publisher sees) or reject. A live title can be taken down the same way.
+
+**Approval puts the series straight into the reader app.** It appears in a "New from Japan, first on Torii" row on the Read home, gets an "Official release" series page with the Japanese title and the next scheduled chapter, and the reader serves the uploaded pages (in the reader's language where uploaded). Paid mode, ₹9 unlocks, progress, analytics and earnings all work as for built-in series. If the publisher licensed print, India-printed volumes appear in the Manga shop once there are enough chapters.
+
+How it's built:
+- Pages are resized (1400px wide) and compressed to WebP in the browser before upload, so chapters stay light on Indian mobile data.
+- The server checks every upload's real file type from its bytes, and stores each image on its own: in Redis (`torii:blob:<id>`) when Upstash is set up, otherwise in `data/uploads/`.
+- Pages are never public: before release only the uploading publisher and Torii staff can load them; after release readers get them through `/api/page`, which checks the chapter is out and unlocked. Covers and banners are public.
+- Passwords are hashed with scrypt; repeated failed sign-ins are slowed down. Publishers can only see and change their own titles.
+- Code: `lib/partner.ts` (rules: release logic, checklist, revenue share, turning an approved submission into a catalogue series), `lib/partner-auth.ts`, `lib/blobs.ts`, `lib/image-client.ts`, `app/api/partner/*`, `app/partner/*`, `app/publisher/review/*`.
+
+### Partner demo accounts
+
+| Publisher | Email | Password |
+|---|---|---|
+| Shueisha (verified, with existing titles and sales) | `partner@shueisha.example` | `torii-demo` |
+| Kodansha (verified) | `partner@kodansha.example` | `torii-demo` |
+
+No manga files handy? On a chapter, **Generate 8 sample pages** draws placeholder pages in the chosen language and uploads them like real ones.
+
+### 3-minute partner demo
+
+1. `/partner` → **Sign in as Shueisha** → **New title**. Name it, fill in author, synopsis and genres, add Hindi as a licensed language, turn on print, **Save**. Upload a cover.
+2. **Add chapter 1** → **Generate 8 sample pages** (switch to Hindi and generate again) → Release: **Release when approved** → Save.
+3. Add chapter 2, upload pages, **Schedule** → *Next Monday 00:00 JST*.
+4. Back on the title: the checklist is all ticked → **Send for review**.
+5. In another browser window, sign in to the fan app as `9999999999` → `/publisher/review` → open the title → **Approve and publish**.
+6. Open `/read`: the series is in "New from Japan, first on Torii". Its page shows "Chapter 2 arrives Mon … IST". Read chapter 1, switch to हिन्दी.
+7. Back in the portal, the title shows **Live on Torii**; Insights and Earnings show the publisher's India data.
+8. Optional: **Join** as a new publisher to see the unverified state, then verify it from the review queue.
 
 ## Run it
 
@@ -181,4 +228,5 @@ Camera scanning needs HTTPS, which all of these hosts provide.
 - Chapter and volume counts are approximate.
 - Analytics are seeded demo data; real activity in the app is added on top.
 - Pincode → region lookup is approximate (first two digits).
-- Out of scope: community/chat, real delivery integration, publisher APIs.
+- Partner payouts and Torii's KYC check of publishers are simulated (one click in the review queue).
+- Out of scope: community/chat, real delivery integration.

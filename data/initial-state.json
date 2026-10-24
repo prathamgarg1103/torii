@@ -76,5 +76,58 @@
  "events": [],
  "chapterOverrides": {},
  "stock": {},
- "editionSold": {}
+ "editionSold": {},
+ "partners": [
+  {
+   "id": "org_shueisha",
+   "publisherId": "shueisha",
+   "name": "Shueisha",
+   "nameJa": "集英社",
+   "country": "Japan",
+   "website": "https://www.shueisha.co.jp",
+   "contactName": "Haruka Sato",
+   "email": "rights@shueisha.example",
+   "verified": true,
+   "agreementVersion": "2026-10",
+   "agreementAcceptedAt": "2026-07-02T17:43:03.631Z",
+   "createdAt": "2026-07-02T17:43:03.631Z"
+  },
+  {
+   "id": "org_kodansha",
+   "publisherId": "kodansha",
+   "name": "Kodansha",
+   "nameJa": "講談社",
+   "country": "Japan",
+   "website": "https://www.kodansha.co.jp",
+   "contactName": "Kenji Mori",
+   "email": "rights@kodansha.example",
+   "verified": true,
+   "agreementVersion": "2026-10",
+   "agreementAcceptedAt": "2026-07-17T17:43:03.631Z",
+   "createdAt": "2026-07-17T17:43:03.631Z"
+  }
+ ],
+ "partnerUsers": [
+  {
+   "id": "pu_shueisha",
+   "orgId": "org_shueisha",
+   "email": "partner@shueisha.example",
+   "name": "Haruka Sato",
+   "role": "owner",
+   "passwordHash": "scrypt$5eed5hue15ha0001$7c727f213c0d2498f0e9de8da93be3114ea9518d9e52e671538e8b46527a2372",
+   "createdAt": "2026-07-02T17:43:03.631Z",
+   "lastLoginAt": null
+  },
+  {
+   "id": "pu_kodansha",
+   "orgId": "org_kodansha",
+   "email": "partner@kodansha.example",
+   "name": "Kenji Mori",
+   "role": "owner",
+   "passwordHash": "scrypt$5eedk0dan5ha0001$c4726a1f577ec41f4f0cd8489537f9a206c34fc542cba16036370c3fbe427061",
+   "createdAt": "2026-07-17T17:43:03.631Z",
+   "lastLoginAt": null
+  }
+ ],
+ "submissions": []
 }

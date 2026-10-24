@@ -20,6 +20,7 @@
 [data-section="figures"] { --accent: 176 104 0; --accentsoft: 250 240 214; --paper: 245 236 206; }
 [data-section="shelf"]   { --accent: 0 135 90;  --accentsoft: 222 243 232; --paper: 219 238 226; }
 [data-section="account"] { --accent: 24 21 34;  --accentsoft: 232 231 240; --paper: 230 229 239; }
+[data-section="partner"] { --accent: 214 0 50;  --accentsoft: 252 232 237; --paper: 244 239 229; --bg: 247 246 242; }
 
 @media (prefers-color-scheme: dark) {
   :root { --bg: 17 15 25; --card: 28 25 39; --fg: 238 236 246; --ink: 4 3 10; --muted: 156 152 178; --line: 48 45 66; color-scheme: dark; }
@@ -28,6 +29,7 @@
   [data-section="figures"] { --accent: 245 182 66;  --accentsoft: 62 46 16; --paper: 44 36 18; }
   [data-section="shelf"]   { --accent: 72 204 146;  --accentsoft: 18 54 40; --paper: 18 40 32; }
   [data-section="account"] { --accent: 228 226 240; --accentsoft: 46 42 62; --paper: 34 31 48; }
+  [data-section="partner"] { --accent: 255 78 112; --accentsoft: 62 24 38; --paper: 36 32 30; --bg: 19 17 24; }
 }
 
 html, body { background: rgb(var(--bg)); color: rgb(var(--fg)); }
@@ -81,3 +83,10 @@ body { overflow-x: clip; }
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
   .js-hide, [data-count] { visibility: visible; }
 }
+
+/* Partner Portal: full-width desktop layout (the fan app stays phone-width). */
+.partner-root { min-height: 100vh; background: rgb(var(--bg)); color: rgb(var(--fg)); }
+.pill { @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[12px] font-semibold ring-1 ring-inset; }
+.field-label { @apply mb-1.5 block text-[13px] font-semibold; }
+.field-hint { @apply mt-1 block text-[12.5px] text-muted; }
+.jp { font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif; }

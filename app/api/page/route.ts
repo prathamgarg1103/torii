@@ -2,7 +2,18 @@ import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { canRead } from "@/lib/catalog";
 import { chapterAt } from "@/lib/derive";
-import { LANGS } from "@/lib/types";
+import { LANGS, type DB, type Lang } from "@/lib/types";
+import { pickPages, releasedChapters } from "@/lib/partner";
+import { blobResponse, getBlob } from "@/lib/blobs";
+
+/** A page the publisher uploaded through the Partner Portal, in the reader's language when it exists. */
+async function partnerPage(db: DB, seriesId: string, c: number, p: number, l: string) {
+  const sub = db.submissions.find((x) => `ps_${x.id}` === seriesId);
+  const ch = sub && releasedChapters(sub)[c - 1];
+  const pick = ch && pickPages(ch, l as Lang);
+  const blob = pick && pick.ids[p - 1] ? await getBlob(pick.ids[p - 1]) : null;
+  return blob ? blobResponse(blob, "private, max-age=3600") : new Response("Not found", { status: 404 });
+}
 
 // Generates placeholder manga pages as SVG. Locked chapters return 403, so pages can't be fetched directly.
 export async function GET(req: Request) {
@@ -13,6 +24,7 @@ export async function GET(req: Request) {
   const ch = s && chapterAt(db, s, c);
   if (!s || !ch || !(p >= 1 && p <= ch.pages)) return new Response("Not found", { status: 404 });
   if (!canRead(db, ch, (await currentUser()))) return new Response("Locked", { status: 403 });
+  if (s.source === "partner") return partnerPage(db, s.id, c, p, l);
   const lang = LANGS.find((x) => x.code === l) ?? LANGS[0];
   const seed = (c * 31 + p * 7) % 4;
   let st = c * 7919 + p * 104729 + slug.length;

@@ -4,6 +4,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import type { Catalog, State, Series, Figure, Event, Lang, AuthTag, User } from "../lib/types";
 import { fromAniList, PUBLISHERS, type AniItem } from "./anilist-map";
+import { partnerSeed } from "./partner-seed";
 
 // Load .env so tag signatures match the running app.
 const envFile = path.join(process.cwd(), ".env");
@@ -181,6 +182,7 @@ const state: State = {
   users, unlocks: [], progress: [], cart: [], orders: [], tags,
   ownership: [{ userId: "u_riya", kind: "figure", refId: luffy.id, source: "verify", createdAt: t(220) }],
   settings: { readingMode: "free" }, events: [], chapterOverrides: {}, stock: {}, editionSold: {},
+  ...partnerSeed(t),
 };
 const dir = path.join(process.cwd(), "data");
 fs.mkdirSync(dir, { recursive: true });

@@ -4,7 +4,8 @@ import path from "node:path";
 import crypto from "node:crypto";
 import catalogJson from "@/data/catalog.json";
 import initialStateJson from "@/data/initial-state.json";
-import type { Catalog, DB, State } from "./types";
+import type { Catalog, DB, Publisher, State } from "./types";
+import { toSeries } from "./partner";
 
 /**
  * Storage for the prototype.
@@ -27,7 +28,7 @@ const redisUrl = () => process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_
 const redisToken = () => process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
 export const storageMode = () => (redisUrl() && redisToken() ? "redis" : "file");
 
-async function redis(cmd: (string | number)[]) {
+export async function redis(cmd: (string | number)[]) {
   const r = await fetch(redisUrl(), {
     method: "POST", headers: { authorization: `Bearer ${redisToken()}`, "content-type": "application/json" },
     body: JSON.stringify(cmd), cache: "no-store",
@@ -38,15 +39,23 @@ async function redis(cmd: (string | number)[]) {
 
 const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
 
+/** State saved before the Partner Portal existed has no partner collections: start them from the seed. */
+function normalize(s: State): State {
+  for (const k of ["partners", "partnerUsers", "submissions"] as const) {
+    if (!Array.isArray(s[k])) (s as unknown as Record<string, unknown>)[k] = clone(initialState[k] ?? []);
+  }
+  return s;
+}
+
 async function loadState(): Promise<State> {
   if (storageMode() === "redis") {
     const { result } = await redis(["GET", KEY]);
-    if (typeof result === "string") return JSON.parse(result);
+    if (typeof result === "string") return normalize(JSON.parse(result));
     const s = clone(initialState);
     await redis(["SET", KEY, JSON.stringify(s)]);
     return s;
   }
-  if (fs.existsSync(FILE)) return JSON.parse(fs.readFileSync(FILE, "utf8"));
+  if (fs.existsSync(FILE)) return normalize(JSON.parse(fs.readFileSync(FILE, "utf8")));
   return clone(initialState);
 }
 
@@ -63,14 +72,21 @@ function compose(s: State, deep: boolean): DB {
     const st = s.stock[f.id], ed = s.editionSold[f.id];
     return st === undefined && ed === undefined ? (deep ? { ...f } : f) : { ...f, stock: st ?? f.stock, editionSold: ed ?? f.editionSold };
   });
+  // Series that partners submitted and Torii approved join the catalogue, under their publisher.
+  const at = Date.now();
+  const partnerSeries = s.submissions.map((x) => toSeries(x, at)).filter((x): x is NonNullable<typeof x> => !!x);
+  const known = new Set(catalog.publishers.map((p) => p.id));
+  const publishers: Publisher[] = [...catalog.publishers];
+  for (const o of s.partners) if (!known.has(o.publisherId)) { known.add(o.publisherId); publishers.push({ id: o.publisherId, name: o.name }); }
   const figIds = new Set(catalog.figures.map((f) => f.id));
   const stock: Record<string, number> = {};
   for (const [k, v] of Object.entries(s.stock)) if (!figIds.has(k)) stock[k] = v;
   return {
-    publishers: catalog.publishers, series: catalog.series, figures,
+    publishers, series: partnerSeries.length ? [...catalog.series, ...partnerSeries] : catalog.series, figures,
     users: s.users, unlocks: s.unlocks, progress: s.progress, cart: s.cart, orders: s.orders, tags: s.tags,
     ownership: s.ownership, settings: s.settings, events: [...catalog.events, ...s.events],
     chapterOverrides: deep ? { ...s.chapterOverrides } : s.chapterOverrides, stock,
+    partners: s.partners, partnerUsers: s.partnerUsers, submissions: s.submissions,
   };
 }
 
@@ -85,6 +101,7 @@ function decompose(db: DB): State {
     users: db.users, unlocks: db.unlocks, progress: db.progress, cart: db.cart, orders: db.orders, tags: db.tags,
     ownership: db.ownership, settings: db.settings, events: db.events.slice(catalog.events.length),
     chapterOverrides: db.chapterOverrides, stock, editionSold,
+    partners: db.partners, partnerUsers: db.partnerUsers, submissions: db.submissions,
   };
 }
 

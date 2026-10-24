@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { read } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { canRead, isChapterFree, ownedVolumes } from "@/lib/catalog";
-import { chapterAt, volumeAt } from "@/lib/derive";
+import { chapterAt, partnerPageCount, volumeAt } from "@/lib/derive";
 import Reader from "@/components/Reader";
 import UnlockGate from "@/components/UnlockGate";
 import { LANGS, type Lang } from "@/lib/types";
@@ -37,7 +37,8 @@ export default async function ChapterPage({ params, searchParams }: { params: { 
 
   return (
     <Reader
-      slug={s.slug} title={s.title} chapter={n} pages={ch.pages} lang={lang} langs={langs} total={s.totalChapters}
+      slug={s.slug} title={s.title} chapter={n} pages={partnerPageCount(s, n, lang)?.count ?? ch.pages}
+      chapterTitle={s.source === "partner" && ch.title !== `Chapter ${n}` ? ch.title : undefined} lang={lang} langs={langs} total={s.totalChapters}
       next={next ? { number: next.number, locked: !canRead(db, next, user), free: isChapterFree(db, next) } : null}
       bridge={vol ? { volumeId: vol.id, number: vol.number, price: vol.price, edition: vol.edition, inStock: vol.stock > 0, owned: owns } : null}
       signedIn={!!user}

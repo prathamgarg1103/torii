@@ -38,7 +38,10 @@ export default async function ReadHome() {
     langs: LANGS.filter((l) => s.languages.includes(l.code)).map((l) => l.native), chapters: s.totalChapters, image: s.image, banner: s.banner, trailer: s.trailer,
     genres: s.genres.slice(0, 3),
   }));
-  const rows = ROWS.map((r) => ({ r, items: rowItems(db.series, r) })).filter((x) => x.items.length >= 5);
+  const rows = ROWS.filter((r) => r.key !== "partner").map((r) => ({ r, items: rowItems(db.series, r) })).filter((x) => x.items.length >= 5);
+  // Series Japanese publishers have released through the Partner Portal get their own row, however few.
+  const partnerRow = ROWS.find((r) => r.key === "partner")!;
+  const fresh = rowItems(db.series, partnerRow);
 
   return (
     <div className="space-y-8">
@@ -75,6 +78,11 @@ export default async function ReadHome() {
           ))}
         </ol>
       </section>
+
+      {fresh.length > 0 && (
+        <Row id="row-partner" title={partnerRow.title} href={`/read/browse?row=partner`}
+          items={fresh.slice(0, 16).map((s) => ({ ...item(s), meta: s.nextRelease ? `Ch. ${s.nextRelease.number} on ${new Date(s.nextRelease.at).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}` : `${pub(s.publisherId)} · ${s.totalChapters} ch` }))} />
+      )}
 
       {because.length >= 4 && <Row id="because" title={`Because you read ${last!.title.replace(/:.*/, "")}`} items={because.map(item)} />}
 

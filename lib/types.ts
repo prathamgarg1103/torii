@@ -26,6 +26,20 @@ export interface Series {
   banner?: string;
   /** YouTube video id of the anime adaptation's trailer. */
   trailer?: string;
+  /** "partner" when a publisher submitted this series through the Partner Portal. */
+  source?: "partner";
+  /** Original Japanese title (partner series). */
+  titleJa?: string;
+  /** Partner series: pages uploaded per language, one entry per released chapter (index = chapter - 1). */
+  partnerPages?: Partial<Record<Lang, number>>[];
+  /** Partner series: chapter titles, one per released chapter. */
+  chapterTitles?: string[];
+  /** Partner series: the next chapter that is scheduled but not yet out. */
+  nextRelease?: { number: number; at: string };
+  /** Partner series: "free" keeps every chapter free; otherwise the first `freeChapters` are free in paid mode. */
+  pricing?: "platform" | "free";
+  freeChapters?: number;
+  publishedAt?: string;
 }
 export interface Chapter {
   id: string; seriesId: string; number: number; volumeNumber: number; title: string; pages: number;
@@ -57,6 +71,46 @@ export interface AuthTag {
 export interface Ownership { userId: string; kind: "volume" | "figure"; refId: string; source: "order" | "verify"; createdAt: string; }
 export interface Event { id: string; type: "read" | "unlock" | "print" | "figure"; seriesId: string; language: Lang; state: string; city: string; amount: number; createdAt: string; }
 
+/* ---------- Partner Portal: Japanese publishers submit series to Torii ---------- */
+
+/** A publishing company that has joined the Torii partner programme. */
+export interface PartnerOrg {
+  id: string;
+  /** The publisher id its series are filed under (an existing catalogue publisher, or a new one). */
+  publisherId: string;
+  name: string; nameJa: string; country: string; website: string; contactName: string; email: string;
+  /** Torii has checked the company's identity and rights (KYC). Titles go live only from verified partners. */
+  verified: boolean;
+  agreementVersion: string; agreementAcceptedAt: string; createdAt: string;
+}
+export interface PartnerUser {
+  id: string; orgId: string; email: string; name: string; passwordHash: string; role: "owner" | "editor";
+  createdAt: string; lastLoginAt: string | null;
+}
+export type ReviewStatus = "draft" | "submitted" | "changes_requested" | "approved" | "rejected";
+export interface PartnerChapter {
+  id: string; number: number; title: string;
+  /** Uploaded page image ids, in reading order, per language. */
+  pages: Partial<Record<Lang, string[]>>;
+  /** null = held back (draft). A date = released at that time, once the series is approved. */
+  releaseAt: string | null;
+  createdAt: string;
+}
+export interface SubmissionEvent { at: string; who: "partner" | "torii"; by: string; action: string; note?: string }
+export interface Submission {
+  id: string; orgId: string; publisherId: string; slug: string;
+  title: string; titleJa: string; author: string; artist: string;
+  genres: string[]; demographic: string; seriesStatus: "ongoing" | "completed"; synopsis: string; startYear: number;
+  ageRating: "all" | "13+" | "16+"; color: string;
+  coverId: string | null; bannerId: string | null;
+  rights: { languages: Lang[]; digital: boolean; print: boolean; merch: boolean; termYears: number; exclusive: boolean };
+  pricing: "platform" | "free"; freeChapters: number;
+  status: ReviewStatus;
+  chapters: PartnerChapter[];
+  history: SubmissionEvent[];
+  createdAt: string; updatedAt: string; submittedAt: string | null; publishedAt: string | null;
+}
+
 /** Chapters, volumes and box sets are not stored: they are derived from each series (see lib/derive.ts). */
 export interface DB {
   publishers: Publisher[]; series: Series[]; figures: Figure[];
@@ -66,6 +120,7 @@ export interface DB {
   chapterOverrides: Record<string, boolean>;
   /** Volume stock that has changed from its starting level, keyed by volume id. */
   stock: Record<string, number>;
+  partners: PartnerOrg[]; partnerUsers: PartnerUser[]; submissions: Submission[];
 }
 
 export interface Catalog {
@@ -76,4 +131,5 @@ export interface State {
   users: User[]; unlocks: Unlock[]; progress: Progress[]; cart: CartItem[]; orders: Order[]; tags: AuthTag[]; ownership: Ownership[];
   settings: { readingMode: "free" | "paid" }; events: Event[];
   chapterOverrides: Record<string, boolean>; stock: Record<string, number>; editionSold: Record<string, number>;
+  partners: PartnerOrg[]; partnerUsers: PartnerUser[]; submissions: Submission[];
 }

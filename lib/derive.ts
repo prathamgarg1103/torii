@@ -1,4 +1,4 @@
-import type { BoxSet, Chapter, DB, Series, Volume } from "./types";
+import { LANGS, type BoxSet, type Chapter, type DB, type Series, type Volume } from "./types";
 
 /* Chapters, volumes and box sets are derived from each series instead of stored, so a
    400-series catalogue stays small. Ids keep the same shape everywhere:
@@ -15,7 +15,11 @@ export function volumeOfChapter(s: Series, n: number) {
 export function chapterAt(db: DB, s: Series, n: number): Chapter | undefined {
   if (!Number.isInteger(n) || n < 1 || n > s.totalChapters) return undefined;
   const id = `c_${s.slug}_${n}`;
-  return { id, seriesId: s.id, number: n, volumeNumber: volumeOfChapter(s, n), title: `Chapter ${n}`, pages: 6 + (hash(id) % 4), freeOverride: db.chapterOverrides[id] ?? null };
+  // Partner series carry their real page counts and chapter titles; built-in ones use placeholders.
+  const pp = s.partnerPages?.[n - 1];
+  const pages = pp ? Math.max(1, ...Object.values(pp).map((x) => x ?? 0)) : 6 + (hash(id) % 4);
+  const title = s.chapterTitles?.[n - 1] || `Chapter ${n}`;
+  return { id, seriesId: s.id, number: n, volumeNumber: volumeOfChapter(s, n), title, pages, freeOverride: db.chapterOverrides[id] ?? null };
 }
 export function chaptersOf(db: DB, s: Series): Chapter[] {
   return Array.from({ length: s.totalChapters }, (_, i) => chapterAt(db, s, i + 1)!);
@@ -55,4 +59,13 @@ export function boxSetsOf(s: Series): BoxSet[] {
 export function boxById(db: DB, id: string) {
   const m = id.match(/^b_(.+)_(all|1)$/); if (!m) return undefined;
   const s = bySlug(db, m[1]); return s ? boxSetsOf(s).find((b) => b.id === id) : undefined;
+}
+
+/** Pages in a partner chapter for a language, falling back to English or any uploaded language. */
+export function partnerPageCount(s: Series, n: number, lang: string): { lang: string; count: number } | null {
+  const pp = s.partnerPages?.[n - 1];
+  if (!pp) return null;
+  const rec = pp as Record<string, number | undefined>;
+  for (const l of [lang, "en", ...LANGS.map((x) => x.code)]) if (rec[l]) return { lang: l, count: rec[l]! };
+  return null;
 }

@@ -15,7 +15,7 @@ export default async function MangaHome({ searchParams }: { searchParams: { pub?
   const user = await currentUser();
   const q = (searchParams.q || "").toLowerCase();
   const list = db.series
-    .filter((s) => (!searchParams.pub || s.publisherId === searchParams.pub) && (!q || s.title.toLowerCase().includes(q) || s.author.toLowerCase().includes(q)))
+    .filter((s) => s.totalVolumes > 0 && (!searchParams.pub || s.publisherId === searchParams.pub) && (!q || s.title.toLowerCase().includes(q) || s.author.toLowerCase().includes(q)))
     .sort((a, b) => b.popularity - a.popularity);
   const boxes = db.series.filter((s) => s.status === "completed").sort((a, b) => b.popularity - a.popularity).slice(0, 10).flatMap((s) => boxSetsOf(s).filter((b) => b.id.endsWith("_all")));
   const filtered = !!(searchParams.pub || q);

@@ -4,6 +4,7 @@ import type { Series } from "./types";
 export type RowDef = { key: string; title: string; test: (s: Series) => boolean; sort?: (a: Series, b: Series) => number };
 const g = (...names: string[]) => (s: Series) => names.some((n) => s.genres.includes(n));
 export const ROWS: RowDef[] = [
+  { key: "partner", title: "New from Japan, first on Torii", test: (s) => s.source === "partner", sort: (a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "") },
   { key: "shonen", title: "Shonen", test: (s) => s.demographic === "Shonen" },
   { key: "action", title: "Action", test: g("Action") },
   { key: "hindi", title: "Read in Hindi", test: (s) => s.languages.includes("hi") },

@@ -6,7 +6,10 @@ import { boxById, volumeById } from "./derive";
 export function isChapterFree(db: DB, ch: Chapter): boolean {
   if (ch.freeOverride !== null) return ch.freeOverride;
   if (db.settings.readingMode === "free") return true;
-  return ch.number <= FREE_CHAPTERS_IN_PAID_MODE;
+  // Partner series can be kept free (a promotion) or choose how many opening chapters are free.
+  const s = ch.seriesId.startsWith("ps_") ? db.series.find((x) => x.id === ch.seriesId) : undefined;
+  if (s?.pricing === "free") return true;
+  return ch.number <= (s?.freeChapters ?? FREE_CHAPTERS_IN_PAID_MODE);
 }
 
 export function canRead(db: DB, ch: Chapter, user: User | null): boolean {
