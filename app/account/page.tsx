@@ -20,7 +20,8 @@ export default async function Account({ searchParams }: { searchParams: { denied
     ["/shelf", "My Shelf", `${unlocks} chapter${unlocks === 1 ? "" : "s"} unlocked`],
     ["/verify", "Check a product", "Scan its code"],
   ];
-  if (user.isAdmin) rows.push(["/publisher", "Publisher dashboard", "Sales and reading data"]);
+  if (user.isAdmin) rows.push(["/publisher", "Publisher dashboard", "Sales and reading data"], ["/publisher/review", "Partner review queue", "Titles from publishers"]);
+  rows.push(["/partner", "For publishers", "Partner Portal ↗"]);
   return (
     <div className="space-y-6">
       {searchParams.denied && <p className="rounded-xl border border-bad/30 bg-bad/10 px-3 py-2.5 text-[14px] font-semibold text-bad">The publisher dashboard needs a publisher account.</p>}

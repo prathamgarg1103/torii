@@ -52,6 +52,13 @@ export default function LoginForm({ next }: { next: string }) {
       <div className="mt-6 rounded-panel border border-dashed border-line p-4 text-[13.5px] leading-relaxed text-muted">
         Trying the demo? Sign in as a fan with <b className="text-fg">9876543210</b> (₹50 in the wallet) or as the publisher with <b className="text-fg">9999999999</b>. Any other number makes a new account.
       </div>
+      <a href="/partner" className="mt-3 flex min-h-[56px] items-center gap-3 rounded-panel border border-line bg-card px-4 transition hover:border-fg/30">
+        <span className="min-w-0 flex-1">
+          <span className="block text-[14.5px] font-bold">Are you a publisher? <span className="font-normal text-muted" lang="ja">出版社の方へ</span></span>
+          <span className="block text-[13px] text-muted">Bring your manga to Torii in the Partner Portal</span>
+        </span>
+        <span aria-hidden className="text-[18px]">→</span>
+      </a>
     </div>
   );
 }
